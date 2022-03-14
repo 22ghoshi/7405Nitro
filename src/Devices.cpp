@@ -14,7 +14,7 @@ std::map<std::string, std::unique_ptr<pros::IMU>> inertials;
 std::map<std::string, std::unique_ptr<pros::Vision>> visions;
 std::map<std::string, std::unique_ptr<pros::Distance>> distances;
 
-// Devices::Devices() {}
+std::map<std::string, std::unique_ptr<pros::Controller>> controllers;
 
 pros::Motor* Devices::getMotor(std::string name, int port, motorGearset gearset, bool reversed) {
 	if (motors.find(name) == motors.end()) {
@@ -101,4 +101,13 @@ pros::Distance* Devices::getDistance(std::string name, int port) {
 		distances[name] = std::make_unique<pros::Distance>(port);
 	}
 	return distances[name].get();
+}
+
+pros::Controller* Devices::getController(std::string name) {
+	if (controllers.find(name) == controllers.end()) {
+		if (name == "Master") {
+			controllers[name] = std::make_unique<pros::Controller>(pros::E_CONTROLLER_MASTER);
+		}
+	}
+	return controllers[name].get();
 }

@@ -1,28 +1,3 @@
-// #pragma once
-// #include "main.h"
-
-// using namespace pros;
-
-// namespace Devices {
-//     //GEARSETS?
-//     Motor frontRight(2, true);
-//     Motor frontLeft(9);
-//     Motor backRight(13);
-//     Motor backLeft(10);
-//     Motor middleLeft(6, true);
-//     Motor middleRight(3);
-//     Motor intake(14, true);
-//     Motor lift(12, true);
-
-//     ADIDigitalOut frontClaw(8, true);
-//     ADIDigitalOut tilter(3, true);
-//     ADIDigitalOut backClaw(1, true);
-
-//     IMU inertial(21);
-//     Distance frontDistance(5);
-//     ADIAnalogIn liftPot(2);
-// }
-
 #pragma once
 #include "main.h"
 
@@ -39,6 +14,8 @@ enum class motors { BackLeft, BackRight, MidLeft, MidRight, FrontLeft, FrontRigh
 enum class motorGroups { LeftDrive, RightDrive, Drive };
 enum class pistons { BackClaw, Tilter, FrontClaw };
 enum class sensors { Inertial, LeftEncoder, RightEncoder, FrontDistance, LiftPotentiometer };
+
+enum class controllers { Master };
 
 namespace Devices {
     //defaults to 200rpm/unreversed
@@ -59,6 +36,8 @@ namespace Devices {
     pros::IMU* getInertial(std::string name, int port);
     pros::Vision* getVision(std::string name, int port);
     pros::Distance* getDistance(std::string name, int port);
+
+    pros::Controller* getController(std::string name);
 
     template <motors motor>
     auto get();
@@ -170,5 +149,13 @@ namespace Devices {
     template<> inline
     auto get<sensors::FrontDistance>() {
         return *(Devices::getDistance("Front", 5));
+    }
+
+    template<controllers controller>
+    auto get();
+
+    template<> inline
+    auto get<controllers::Master>() {
+        return *(Devices::getController("Master"));
     }
 };
