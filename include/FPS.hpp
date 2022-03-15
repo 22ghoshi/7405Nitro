@@ -50,5 +50,11 @@ struct Point {
 };
 
 class FPS {
+    public:
+    FPS();
 
+    static Point currentPos;
+    static void run(void* params);
+    static double toRadians(double degrees);
+    static double toDegrees(double radians);
 };

@@ -12,4 +12,4 @@ class PID {
     
     PID(double kP, double kI, double kD, double minSpeed = 0, double maxSpeed = 128, double maxChange = 256);
     double getPID(double err);
-}
+};

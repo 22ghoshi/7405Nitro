@@ -28,15 +28,15 @@ double PID::getPID(double err) {
     D = err - prevErr;
     double speed = (kP * P) + (kI * I) + (kD * D);
 
-    if (fabs(speed) > fabs(maxSpeed)) {
+    if (fabs(speed) > maxSpeed) {
         speed = speed > 0 ? maxSpeed : -maxSpeed;
     }
-    if (fabs(speed) < fabs(minSpeed)) {
+    if (fabs(speed) < minSpeed) {
         speed = speed > 0 ? minSpeed : -minSpeed;
     }
 
-    double change = fabs(speed - prevSpeed);
-    if (change > maxChange) {
+    double change = speed - prevSpeed;
+    if (fabs(change) > maxChange) {
         speed = change > 0 ? prevSpeed + maxChange : prevSpeed - maxChange;
     }
 

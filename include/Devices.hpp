@@ -126,15 +126,15 @@ namespace Devices {
         return *(Devices::getInertial("Inertial", 21));
     }
 
-    // template<> inline
-    // auto get<sensors::LeftEncoder>() {
-    //     return *(Devices::getEncoder("Left", 7));
-    // }
+    template<> inline
+    auto get<sensors::LeftEncoder>() {
+        return *(Devices::getEncoder("Left", 7));
+    }
 
-    // template<> inline
-    // auto get<sensors::RightEncoder>() {
-    //     return *(Devices::getEncoder("Right", 5));
-    // }
+    template<> inline
+    auto get<sensors::RightEncoder>() {
+        return *(Devices::getEncoder("Right", 5));
+    }
 
     template<> inline
     auto get<sensors::LiftPotentiometer>() {
