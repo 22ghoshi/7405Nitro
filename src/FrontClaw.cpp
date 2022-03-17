@@ -1,20 +1,20 @@
-#include "FrontClaw.cpp"
+#include "FrontClaw.hpp"
 
 FrontClaw::FrontClaw(bool initState, bool up) {
     this->state = initState;
-    this->up = up;
+    upVal = up;
 }
 
 void FrontClaw::up() {
-    if (state == !up) {
-        state = up;
+    if (state == !upVal) {
+        state = upVal;
     }
-    Devices::get<pistons::FrontClaw>().set_value(up);
+    Devices::get<pistons::FrontClaw>().set_value(state);
 }
 
 void FrontClaw::down() {
-    if (state == up) {
-        state = !up;
+    if (state == upVal) {
+        state = !upVal;
     }
     Devices::get<pistons::FrontClaw>().set_value(state);
 }
@@ -24,7 +24,7 @@ void FrontClaw::toggle() {
     Devices::get<pistons::FrontClaw>().set_value(state);
 }
 
-double FrontClaw::waitForGoal(double distanceLimit, double timeLimit) {
+void FrontClaw::waitForGoal(double distanceLimit, double timeLimit) {
     up();
     int startTime = pros::millis();
     int currentTime = 0;
@@ -35,7 +35,7 @@ double FrontClaw::waitForGoal(double distanceLimit, double timeLimit) {
     down();
 }
 
-double FrontClaw::waitForGoal(double distanceLimit, double yLimit, double timeLimit) {
+void FrontClaw::waitForGoal(double distanceLimit, double yLimit, double timeLimit) {
     up();
     int startTime = pros::millis();
     int currentTime = 0;
@@ -46,6 +46,6 @@ double FrontClaw::waitForGoal(double distanceLimit, double yLimit, double timeLi
     down();
 }
 
-double FrontClaw::hasGoal(double hasDistance) {
-    return (Devices::get<sensors::FrontDistance>().get() < goalDistance && Devices::get<sensors::FrontDistance>().get() != 0)
+bool FrontClaw::hasGoal(double goalDistance) {
+    return (Devices::get<sensors::FrontDistance>().get() < goalDistance && Devices::get<sensors::FrontDistance>().get() != 0);
 }

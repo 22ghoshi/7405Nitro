@@ -6,9 +6,9 @@
 class BackClaw {
     public:
     bool state;
-    bool up;
+    bool upVal;
     bool tilterState;
-    bool tilterIn;
+    bool tilterInVal;
 
 
     BackClaw(bool tilterInit, bool tilterIn, bool clampInit, bool clampUp);

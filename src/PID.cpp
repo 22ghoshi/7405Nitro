@@ -14,11 +14,11 @@ PID::PID(double kP, double kI, double kD, double minSpeed, double maxSpeed, doub
     prevErr = 0;
     prevSpeed = 0;
 
-    n = 0;
+    reset = true;
 }
 
 double PID::getPID(double err) {
-    if (n == 0) {
+    if (reset) {
         prevErr = err;
         I = 0;
     }
@@ -42,7 +42,7 @@ double PID::getPID(double err) {
 
     prevErr = err;
     prevSpeed = speed;
-    n++;
+    reset = false;
 
     return speed;
 }

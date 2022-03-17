@@ -2,21 +2,21 @@
 
 BackClaw::BackClaw(bool tilterInit, bool tilterIn, bool clampInit, bool clampUp) {
     this->state = clampInit;
-    this->up = clampUp;
+    upVal = clampUp;
     this->tilterState = tilterInit;
-    this->tilterIn = tilterIn;    
+    tilterInVal = tilterIn;    
 }
 
 void BackClaw::up() {
-    if (state == !up && tilterState == !tilterIn) {
-        state = up;
+    if (state == !upVal && tilterState == !tilterInVal) {
+        state = upVal;
     }
     Devices::get<pistons::BackClaw>().set_value(state);
 }
 
 void BackClaw::down() {
-    if (state == up) {
-        state = !up;
+    if (state == upVal) {
+        state = !upVal;
     }
     Devices::get<pistons::BackClaw>().set_value(state);
 }
@@ -27,15 +27,15 @@ void BackClaw::toggle() {
 }
 
 void BackClaw::tilterIn() {
-    if (tilterState == !tilterIn) {
-        tilterState = tilterIn;
+    if (tilterState == !tilterInVal) {
+        tilterState = tilterInVal;
     }
     Devices::get<pistons::Tilter>().set_value(tilterState);
 }
 
 void BackClaw::tilterOut() {
-    if (tilterState == tilterIn) {
-        tilterState == !tilterIn;
+    if (tilterState == tilterInVal) {
+        tilterState == !tilterInVal;
     }
     Devices::get<pistons::Tilter>().set_value(tilterState);
 }
