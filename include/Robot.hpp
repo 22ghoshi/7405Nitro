@@ -11,5 +11,13 @@
 using namespace pros;
 
 class Robot {
+    public:
+    static BackClaw backClaw;
+    static Drive drive;
+    static FPS fps;
+    static FrontClaw frontClaw;
+    static Intake intake;
+    static Lift lift;
     
+    Robot();
 };

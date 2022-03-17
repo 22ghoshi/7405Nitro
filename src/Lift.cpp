@@ -8,6 +8,9 @@ Lift::Lift(double kP, double kI, double kD, int delay) : liftPID(kP, kI, kD) {
 }
 
 void Lift::moveUp() {
+    if (down) {
+        down = false;
+    }
     up = true;
     delayn = 0;
     Devices::get<motors::Lift>() = 127;
@@ -19,6 +22,9 @@ void Lift::upHold() {
 }
 
 void Lift::moveDown() {
+    if (up) {
+        up = false;
+    }
     down = true;
     delayn = 0;
     Devices::get<motors::Lift>() = -127;

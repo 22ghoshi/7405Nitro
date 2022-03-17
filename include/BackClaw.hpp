@@ -11,7 +11,7 @@ class BackClaw {
     bool tilterInVal;
 
 
-    BackClaw(bool tilterInit, bool tilterIn, bool clampInit, bool clampUp);
+    BackClaw(bool clampInit, bool clampUp, bool tilterInit, bool tilterIn);
     void up();
     void down();
     void toggle();

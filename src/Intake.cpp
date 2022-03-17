@@ -8,6 +8,9 @@ Intake::Intake(double intakeSpeed, double outtakeSpeed) {
 }
 
 void Intake::intake() {
+    if (outtaking) {
+        outtaking = false;
+    }
     intaking = true;
     Devices::get<motors::Intake>() = intakeSpeed;
 }
@@ -18,6 +21,9 @@ void Intake::intakeHold() {
 }
 
 void Intake::outtake() {
+    if (intaking) {
+        intaking = false;
+    }
     outtaking = true;
     Devices::get<motors::Intake>() = outtakeSpeed;
 }
