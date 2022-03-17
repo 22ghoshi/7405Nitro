@@ -1,6 +1,6 @@
 #include "Lift.hpp"
 
-Lift::Lift(double kP, double kI, double kD, double delay) : liftPID(kP, kI, kD) {
+Lift::Lift(double kP, double kI, double kD, int delay) : liftPID(kP, kI, kD) {
     up = false;
     down = false;
     this->delay = delay;
