@@ -7,27 +7,27 @@ Intake::Intake(double intakeSpeed, double outtakeSpeed) {
     this->outtakeSpeed = outtakeSpeed;
 }
 
-void intake() {
+void Intake::intake() {
     intaking = true;
     Devices::get<motors::Intake>() = intakeSpeed;
 }
 
-void intakeHold() {
+void Intake::intakeHold() {
     intaking = false;
     hold();
 }
 
-void outtake() {
+void Intake::outtake() {
     outtaking = true;
     Devices::get<motors::Intake>() = outtakeSpeed;
 }
 
-void outtakeHold() {
+void Intake::outtakeHold() {
     outtaking = false;
     hold();
 }
 
-void hold() {
+void Intake::hold() {
     if (!(intaking || outtaking)) {
         Devices::get<motors::Intake>() = 0;
     }
