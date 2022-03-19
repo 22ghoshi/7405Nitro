@@ -2,10 +2,12 @@
 #include "main.h"
 
 #include "Devices.hpp"
+#include "FPS.hpp"
 
 class Drive {
     public:
     Drive();
+
     void arcade(double power, double turn);
     void tank(double left, double right);
     void mecanum(double power, double strafe, double turn);

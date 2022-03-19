@@ -1,6 +1,6 @@
 #include "includes.hpp"
 
-std::vector<std::string> autonNames{"left", "middle", "right", "skills"};
+std::vector<std::string> autonNames{"left", "middle", "right", "skills", "test"};
 autons auton = autons::left;
 
 lv_obj_t * myButton;
@@ -52,8 +52,8 @@ static lv_res_t btn_click_action6(lv_obj_t * btn) {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::delay(100);
+	  pros::lcd::initialize();
+	  pros::delay(100);
 
     lv_style_copy(&myButtonStyleREL, &lv_style_plain);
     myButtonStyleREL.body.main_color = LV_COLOR_MAKE(0, 0, 150);
@@ -111,7 +111,7 @@ void initialize() {
     myButtonLabel = lv_label_create(myButton, NULL);
     lv_label_set_text(myButtonLabel, autonNames[3].c_str());
 
-    
+    Thread::startTask("fps", FPS::run);
 }
 
 /**

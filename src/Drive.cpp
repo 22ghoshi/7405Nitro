@@ -43,7 +43,9 @@ int Drive::dampen(int input) {
 
 void Drive::drive(int deadzone) {
     int power = Devices::get<controllers::Master>().get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+    power = power < deadzone ? 0 : power;
     int turn = Devices::get<controllers::Master>().get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+    turn = turn < deadzone ? 0 : turn;
     if (fabs(power) < deadzone && fabs(turn) < deadzone) {
         stop();
     }

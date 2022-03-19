@@ -1,5 +1,7 @@
 #include "FPS.hpp"
 
+Point FPS::currentPos;
+
 FPS::FPS() {}
 
 void FPS::run(void* params) {
@@ -12,6 +14,7 @@ void FPS::run(void* params) {
             Devices::get<sensors::LeftEncoder>().reset();
             Devices::get<sensors::RightEncoder>().reset();
             currentPos = Point();
+            pros::delay(20);
         }
 
         currentPos.h = Devices::get<sensors::Inertial>().get_rotation();

@@ -3,5 +3,5 @@
 #include <string>
 #include <vector>
 
-enum class autons { left, middle, right, skills };
+enum class autons { left, middle, right, skills, test };
 extern autons auton;
