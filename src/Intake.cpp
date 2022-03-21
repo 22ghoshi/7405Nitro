@@ -1,10 +1,15 @@
 #include "Intake.hpp"
 
-Intake::Intake(double intakeSpeed, double outtakeSpeed) {
+bool Intake::intaking;
+bool Intake::outtaking;
+double Intake::intakeSpeed;
+double Intake::outtakeSpeed;
+
+Intake::Intake(double intake, double outtake) {
     intaking = false;
     outtaking = false;
-    this->intakeSpeed = intakeSpeed;
-    this->outtakeSpeed = outtakeSpeed;
+    intakeSpeed = intake;
+    outtakeSpeed = outtake;
 }
 
 void Intake::intake() {

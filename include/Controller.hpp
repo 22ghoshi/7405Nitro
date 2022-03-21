@@ -20,7 +20,7 @@ class Controller {
     static std::map<pros::controller_digital_e_t, std::function<void(void)>> buttonNewPressActions;
 
     public:
-    static void update(void* params);
+    static void update();
     static void act();
     static void registerButton(pros::controller_digital_e_t button, std::function<void(void)> action, std::function<void(void)> defaultAction);
     static void registerButtonNewPress(pros::controller_digital_e_t button, std::function<void(void)> action);

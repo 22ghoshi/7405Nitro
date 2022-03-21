@@ -13,7 +13,7 @@ enum class motorGearset { GS100, GS200, GS600 };
 enum class motors { BackLeft, BackRight, MidLeft, MidRight, FrontLeft, FrontRight, Intake, Lift };
 enum class motorGroups { LeftDrive, RightDrive, Drive };
 enum class pistons { BackClaw, Tilter, FrontClaw };
-enum class sensors { Inertial, LeftEncoder, RightEncoder, FrontDistance, LiftPotentiometer };
+enum class sensors { Inertial, LeftEncoder, RightEncoder, FrontDistance, BackDistance, LiftPotentiometer };
 
 enum class controllers { Master };
 
@@ -44,42 +44,42 @@ namespace Devices {
 
     template<> inline
     auto get<motors::BackLeft>() {
-        return *(Devices::getMotor("Back Left", 10, motorGearset::GS200));
+        return *(Devices::getMotor("Back Left", 17, motorGearset::GS200, true));
     }
 
     template<> inline
     auto get<motors::BackRight>() {
-        return *(Devices::getMotor("Back Right", 13, motorGearset::GS200));
+        return *(Devices::getMotor("Back Right", 1, motorGearset::GS200));
     }
 
     template<> inline
     auto get<motors::MidLeft>() {
-        return *(Devices::getMotor("Mid Left", 6, motorGearset::GS200, true));
+        return *(Devices::getMotor("Mid Left", 3, motorGearset::GS200));
     }
 
     template<> inline
     auto get<motors::MidRight>() {
-        return *(Devices::getMotor("Mid Right", 3, motorGearset::GS200));
+        return *(Devices::getMotor("Mid Right", 13, motorGearset::GS200, true));
     }
 
     template<> inline
     auto get<motors::FrontLeft>() {
-        return *(Devices::getMotor("Front Left", 9, motorGearset::GS200));
+        return *(Devices::getMotor("Front Left", 15, motorGearset::GS200, true));
     }
 
     template<> inline
     auto get<motors::FrontRight>() {
-        return *(Devices::getMotor("Front Right", 2, motorGearset::GS200, true));
+        return *(Devices::getMotor("Front Right", 7, motorGearset::GS200));
     }
 
     template<> inline
     auto get<motors::Intake>() {
-        return *(Devices::getMotor("Intake", 14, motorGearset::GS200, true));
+        return *(Devices::getMotor("Intake", 21, motorGearset::GS200, true));
     }
 
     template<> inline
     auto get<motors::Lift>() {
-        return *(Devices::getMotor("Lift", 12, motorGearset::GS100, true));
+        return *(Devices::getMotor("Lift", 11, motorGearset::GS100, true));
     }
 
     template <motorGroups motorGroup>
@@ -105,17 +105,17 @@ namespace Devices {
 
     template<> inline
     auto get<pistons::BackClaw>() {
-        return *(Devices::getPiston("Back Clamp", 1, true));
+        return *(Devices::getPiston("Back Clamp", 4, true));
     }
 
     template<> inline
     auto get<pistons::Tilter>() {
-        return *(Devices::getPiston("Tilter", 3, true));
+        return *(Devices::getPiston("Tilter", 2, true));
     }
 
     template<> inline
     auto get<pistons::FrontClaw>() {
-        return *(Devices::getPiston("Front Clamp", 8, true));
+        return *(Devices::getPiston("Front Clamp", 1, true));
     }
 
     template <sensors sensor>
@@ -123,7 +123,7 @@ namespace Devices {
 
     template<> inline
     auto get<sensors::Inertial>() {
-        return *(Devices::getInertial("Inertial", 21));
+        return *(Devices::getInertial("Inertial", 20));
     }
 
     template<> inline
@@ -138,17 +138,17 @@ namespace Devices {
 
     template<> inline
     auto get<sensors::LiftPotentiometer>() {
-        return *(Devices::getPotentiometer("Lift", 2));
+        return *(Devices::getPotentiometer("Lift", 3));
     }
 
-    // template<> inline
-    // auto get<sensors::BackDistance>() {
-    //     return *(Devices::getDistance("Back", 9));
-    // }
+    template<> inline
+    auto get<sensors::BackDistance>() {
+        return *(Devices::getDistance("Back", 9));
+    }
 
     template<> inline
     auto get<sensors::FrontDistance>() {
-        return *(Devices::getDistance("Front", 5));
+        return *(Devices::getDistance("Front", 10));
     }
 
     template<controllers controller>

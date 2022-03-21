@@ -1,7 +1,10 @@
 #include "FrontClaw.hpp"
 
+bool FrontClaw::upVal;
+bool FrontClaw::state;
+
 FrontClaw::FrontClaw(bool initState, bool up) {
-    this->state = initState;
+    state = initState;
     upVal = up;
 }
 

@@ -1,9 +1,14 @@
 #include "BackClaw.hpp"
 
+bool BackClaw::state;
+bool BackClaw::upVal;
+bool BackClaw::tilterState;
+bool BackClaw::tilterInVal;
+
 BackClaw::BackClaw(bool clampInit, bool clampUp, bool tilterInit, bool tilterIn) {
-    this->state = clampInit;
+    state = clampInit;
     upVal = clampUp;
-    this->tilterState = tilterInit;
+    tilterState = tilterInit;
     tilterInVal = tilterIn;    
 }
 

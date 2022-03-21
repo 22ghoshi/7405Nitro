@@ -1,13 +1,12 @@
 #include "FPS.hpp"
 
-Point FPS::currentPos;
+Point FPS::currentPos{Point()};
 
 FPS::FPS() {}
 
 void FPS::run(void* params) {
     Devices::get<sensors::LeftEncoder>().reset();
     Devices::get<sensors::RightEncoder>().reset();
-    currentPos = Point();
 
     while (true) {
         if (pros::Task::notify_take(true, 20)) {
@@ -17,7 +16,8 @@ void FPS::run(void* params) {
             pros::delay(20);
         }
 
-        currentPos.h = Devices::get<sensors::Inertial>().get_rotation();
+        currentPos.h = Devices::get<sensors::Inertial>().get_heading();
+        currentPos.h = currentPos.h < 180 ? currentPos.h : currentPos.h - 360;
         double verticalMovement = ((Devices::get<sensors::LeftEncoder>().get_value() + Devices::get<sensors::RightEncoder>().get_value()) / 2.0);
 
         Point deltaPoint;

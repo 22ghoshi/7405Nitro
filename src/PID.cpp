@@ -1,5 +1,7 @@
 #include "PID.hpp"
 
+PID::PID() {}
+
 PID::PID(double kP, double kI, double kD, double minSpeed, double maxSpeed, double maxChange) {
     this->kP = kP;
     this->kI = kI;

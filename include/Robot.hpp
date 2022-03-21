@@ -10,8 +10,6 @@
 
 #include <queue>
 
-using namespace pros;
-
 class Robot {
     public:
     static BackClaw backClaw;
@@ -41,5 +39,5 @@ class Robot {
     static void turnBackTo(double x, double y, std::initializer_list<double> newtPID, double newtacc);
     static void turnBackToNow(double x, double y, std::initializer_list<double> newtPID, double newtacc);
     static void waitUntilStop();
-    static void display();
+    static void display(void* params);
 };

@@ -1,10 +1,18 @@
 #include "Lift.hpp"
 
-Lift::Lift(double kP, double kI, double kD, int delay) : liftPID(kP, kI, kD) {
+PID Lift::liftPID;
+bool Lift::up;
+bool Lift::down;
+int Lift::delay;
+int Lift::delayn;
+double Lift::holdVal;
+
+Lift::Lift(double kP, double kI, double kD, int delayset) {
     up = false;
     down = false;
-    this->delay = delay;
+    delay = delayset;
     delayn = 0;
+    liftPID = PID(kP, kI, kD);
 }
 
 void Lift::moveUp() {

@@ -28,8 +28,6 @@ void Robot::move(void* params) {
         if ((turning && !turningDeg) || moveErr > 200.0) {
             targetPos.h = FPS::currentPos.angleTo(targetPos);
         }
-        double heading = Devices::get<sensors::Inertial>().get_heading();
-        heading = heading < 180 ? heading : heading - 360;
         turnErr = targetPos.h - FPS::currentPos.h;
         turnErr = turnErr < 180 ? turnErr : turnErr - 360;
         double direction = cos(FPS::toRadians(turnErr)) > 0 ? 1.0 : -1.0;
@@ -39,10 +37,10 @@ void Robot::move(void* params) {
 
         if (fabs(turnErr) > tacc) {
             double turnSpeed = tPID.getPID(turnErr);
-            drive.arcade(0, turnSpeed);
+            Drive::arcade(0, turnSpeed);
             printf("\ncurrentPos = (%d, %d, %d), targetPos = (%d, %d, %d), move = %d, turnErr = %d, turnSpeed = %d", (int)FPS::currentPos.x, (int)FPS::currentPos.y, (int)FPS::currentPos.h, (int)targetPos.x, (int)targetPos.y, (int)targetPos.h, moven, (int)turnErr, (int)turnSpeed);
         }
-        else if (fabs(moveErr) > macc) {
+        else if (moveErr > macc) {
             double turnSpeed = tPID.getPID(turnErr);
             double moveSpeed = mPID.getPID(moveErr);
             double speedSum = moveSpeed + fabs(turnSpeed);
@@ -50,11 +48,11 @@ void Robot::move(void* params) {
             double maxTurnSpeed = turnSpeed * (127.0 / speedSum);
             moveSpeed = moveSpeed < maxMoveSpeed ? moveSpeed : maxMoveSpeed;
             turnSpeed = fabs(turnSpeed) < fabs(maxTurnSpeed) ? turnSpeed : maxTurnSpeed;
-            drive.arcade(moveSpeed * direction, turnSpeed);
+            Drive::arcade(moveSpeed * direction, turnSpeed);
             printf("\ncurrentPos = (%d, %d, %d), targetPos = (%d, %d, %d), move = %d, moveErr = %d, moveSpeed = %d, turnErr = %d, turnSpeed = %d", (int)FPS::currentPos.x, (int)FPS::currentPos.y, (int)FPS::currentPos.h, (int)targetPos.x, (int)targetPos.y, (int)targetPos.h, moven, (int)moveErr, (int)moveSpeed, (int)turnErr, (int)turnSpeed);
         }
         else {
-            drive.stop();
+            Drive::stop();
         }
     }
 }
@@ -218,7 +216,7 @@ void Robot::waitUntilStop() {
     }
 }
 
-void Robot::display() {
+void Robot::display(void* params) {
     Devices::get<controllers::Master>().clear();
     while (true) {
         pros::lcd::print(0, "X: %f", FPS::currentPos.x);

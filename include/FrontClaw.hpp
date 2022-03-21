@@ -6,15 +6,15 @@
 
 class FrontClaw {
     public:
-    bool upVal;
-    bool state;
+    static bool upVal;
+    static bool state;
 
     FrontClaw(bool initState, bool up);
-    void up();
-    void down();
-    void toggle();
+    static void up();
+    static void down();
+    static void toggle();
 
-    void waitForGoal(double distanceLimit, double timeLimit);
-    void waitForGoal(double distanceLimit, double yLimit, double timeLimit);
-    bool hasGoal(double goalDistance);
+    static void waitForGoal(double distanceLimit, double timeLimit);
+    static void waitForGoal(double distanceLimit, double yLimit, double timeLimit);
+    static bool hasGoal(double goalDistance);
 };

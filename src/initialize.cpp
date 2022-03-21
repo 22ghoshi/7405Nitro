@@ -55,63 +55,67 @@ void initialize() {
 	  pros::lcd::initialize();
 	  pros::delay(100);
 
-    lv_style_copy(&myButtonStyleREL, &lv_style_plain);
-    myButtonStyleREL.body.main_color = LV_COLOR_MAKE(0, 0, 150);
-    myButtonStyleREL.body.grad_color = LV_COLOR_MAKE(200, 200, 200);
-    myButtonStyleREL.body.radius = 10;
-    myButtonStyleREL.text.color = LV_COLOR_MAKE(255, 255, 255);
+    // lv_style_copy(&myButtonStyleREL, &lv_style_plain);
+    // myButtonStyleREL.body.main_color = LV_COLOR_MAKE(0, 0, 150);
+    // myButtonStyleREL.body.grad_color = LV_COLOR_MAKE(200, 200, 200);
+    // myButtonStyleREL.body.radius = 10;
+    // myButtonStyleREL.text.color = LV_COLOR_MAKE(255, 255, 255);
 
-    lv_style_copy(&myButtonStylePR, &lv_style_plain);
-    myButtonStylePR.body.main_color = LV_COLOR_MAKE(0, 0, 255);
-    myButtonStylePR.body.grad_color = LV_COLOR_MAKE(255, 255, 255);
-    myButtonStylePR.body.radius = 10;
-    myButtonStylePR.text.color = LV_COLOR_MAKE(255, 255, 255);
+    // lv_style_copy(&myButtonStylePR, &lv_style_plain);
+    // myButtonStylePR.body.main_color = LV_COLOR_MAKE(0, 0, 255);
+    // myButtonStylePR.body.grad_color = LV_COLOR_MAKE(255, 255, 255);
+    // myButtonStylePR.body.radius = 10;
+    // myButtonStylePR.text.color = LV_COLOR_MAKE(255, 255, 255);
 
-    myButton = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_set_free_num(myButton, 0);
-    lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action3);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
-    lv_obj_set_size(myButton, 225, 105);
-    lv_obj_align(myButton, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
+    // myButton = lv_btn_create(lv_scr_act(), NULL);
+    // lv_obj_set_free_num(myButton, 0);
+    // lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action3);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
+    // lv_obj_set_size(myButton, 225, 105);
+    // lv_obj_align(myButton, NULL, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
 
-    myButtonLabel = lv_label_create(myButton, NULL);
-    lv_label_set_text(myButtonLabel, autonNames[0].c_str());
+    // myButtonLabel = lv_label_create(myButton, NULL);
+    // lv_label_set_text(myButtonLabel, autonNames[0].c_str());
 
-    myButton = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_set_free_num(myButton, 0);
-    lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action4);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
-    lv_obj_set_size(myButton, 225, 105);
-    lv_obj_align(myButton, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 10);
+    // myButton = lv_btn_create(lv_scr_act(), NULL);
+    // lv_obj_set_free_num(myButton, 0);
+    // lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action4);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
+    // lv_obj_set_size(myButton, 225, 105);
+    // lv_obj_align(myButton, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 10);
 
-    myButtonLabel = lv_label_create(myButton, NULL);
-    lv_label_set_text(myButtonLabel, autonNames[1].c_str());
+    // myButtonLabel = lv_label_create(myButton, NULL);
+    // lv_label_set_text(myButtonLabel, autonNames[1].c_str());
 
-    myButton = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_set_free_num(myButton, 0);
-    lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action5);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
-    lv_obj_set_size(myButton, 225, 105);
-    lv_obj_align(myButton, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
+    // myButton = lv_btn_create(lv_scr_act(), NULL);
+    // lv_obj_set_free_num(myButton, 0);
+    // lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action5);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
+    // lv_obj_set_size(myButton, 225, 105);
+    // lv_obj_align(myButton, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
 
-    myButtonLabel = lv_label_create(myButton, NULL);
-    lv_label_set_text(myButtonLabel, autonNames[2].c_str());
+    // myButtonLabel = lv_label_create(myButton, NULL);
+    // lv_label_set_text(myButtonLabel, autonNames[2].c_str());
 
-    myButton = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_set_free_num(myButton, 0);
-    lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action6);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
-    lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
-    lv_obj_set_size(myButton, 225, 105);
-    lv_obj_align(myButton, NULL, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);
+    // myButton = lv_btn_create(lv_scr_act(), NULL);
+    // lv_obj_set_free_num(myButton, 0);
+    // lv_btn_set_action(myButton, LV_BTN_ACTION_CLICK, btn_click_action6);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_REL, &myButtonStyleREL);
+    // lv_btn_set_style(myButton, LV_BTN_STYLE_PR, &myButtonStylePR);
+    // lv_obj_set_size(myButton, 225, 105);
+    // lv_obj_align(myButton, NULL, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);
 
-    myButtonLabel = lv_label_create(myButton, NULL);
-    lv_label_set_text(myButtonLabel, autonNames[3].c_str());
+    // myButtonLabel = lv_label_create(myButton, NULL);
+    // lv_label_set_text(myButtonLabel, autonNames[3].c_str());
 
+    Devices::get<sensors::Inertial>().reset();
+    pros::delay(3000);
     Thread::startTask("fps", FPS::run);
+    pros::delay(20);
+    Thread::startTask("display", Robot::display);
 }
 
 /**

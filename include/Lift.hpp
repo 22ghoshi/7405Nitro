@@ -6,17 +6,17 @@
 
 class Lift {
     private:
-    PID liftPID;
-    bool up;
-    bool down;
-    int delay, delayn;
-    double holdVal;
+    static PID liftPID;
+    static bool up;
+    static bool down;
+    static int delay, delayn;
+    static double holdVal;
 
     public:
-    Lift(double kP, double kI, double kD, int delay);
-    void moveUp();
-    void moveDown();
-    void upHold();
-    void downHold();
-    void hold();
+    Lift(double kP, double kI, double kD, int delayset);
+    static void moveUp();
+    static void moveDown();
+    static void upHold();
+    static void downHold();
+    static void hold();
 };

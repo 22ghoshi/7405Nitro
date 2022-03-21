@@ -9,17 +9,13 @@ std::map<pros::controller_digital_e_t, std::function<void(void)>> Controller::bu
 
 Controller::Controller() {}
 
-void Controller::update(void* params) {
-    while(true) {
-        for (int i = pros::E_CONTROLLER_DIGITAL_L1; i <= pros::E_CONTROLLER_DIGITAL_A; i++) {
-            buttonStatus[(pros::controller_digital_e_t)i] = Devices::get<controllers::Master>().get_digital((pros::controller_digital_e_t)i);
-        }
+void Controller::update() {
+    for (int i = pros::E_CONTROLLER_DIGITAL_L1; i <= pros::E_CONTROLLER_DIGITAL_A; i++) {
+        buttonStatus[(pros::controller_digital_e_t)i] = Devices::get<controllers::Master>().get_digital((pros::controller_digital_e_t)i);
+    }
 
-        for (int i = pros::E_CONTROLLER_DIGITAL_L1; i <= pros::E_CONTROLLER_DIGITAL_A; i++) {
-            buttonNewPressStatus[(pros::controller_digital_e_t)i] = Devices::get<controllers::Master>().get_digital_new_press((pros::controller_digital_e_t)i);
-        } 
-
-        pros::delay(20);
+    for (int i = pros::E_CONTROLLER_DIGITAL_L1; i <= pros::E_CONTROLLER_DIGITAL_A; i++) {
+        buttonNewPressStatus[(pros::controller_digital_e_t)i] = Devices::get<controllers::Master>().get_digital_new_press((pros::controller_digital_e_t)i);
     }
 }
 
