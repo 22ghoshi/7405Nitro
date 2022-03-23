@@ -22,6 +22,7 @@ void opcontrol() {
 	Controller::registerButton(pros::E_CONTROLLER_DIGITAL_R1, Intake::outtake, Intake::outtakeHold);
 	Controller::registerButton(pros::E_CONTROLLER_DIGITAL_L1, Lift::moveUp, Lift::upHold);
 	Controller::registerButton(pros::E_CONTROLLER_DIGITAL_L2, Lift::moveDown, Lift::downHold);
+	Controller::registerButtonNewPress(pros::E_CONTROLLER_DIGITAL_DOWN, autonomous);
 	while (true) {
 		
 		Drive::drive(0);

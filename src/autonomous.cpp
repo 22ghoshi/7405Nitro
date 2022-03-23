@@ -32,8 +32,7 @@ void test() {
  * from where it left off.
  */
 void autonomous() {
-    Devices::get<sensors::Inertial>().tare_rotation();
-    pros::delay(20);
+    Thread::notifyTask("fps");
     Thread::startTask("move", Robot::move);
 
     switch(auton) {
@@ -55,7 +54,5 @@ void autonomous() {
     }
     Robot::waitUntilStop();
     Thread::notifyTask("move");
-    pros::delay(20);
-    Thread::killTask("move");
-    Robot::drive.stop();
+    Drive::stop();
 }

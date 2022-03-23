@@ -111,11 +111,14 @@ void initialize() {
     // myButtonLabel = lv_label_create(myButton, NULL);
     // lv_label_set_text(myButtonLabel, autonNames[3].c_str());
 
+    Thread::startTask("brain display", Robot::brainDisplay);
+    Thread::startTask("controller display", Robot::controllerDisplay);
     Devices::get<sensors::Inertial>().reset();
-    pros::delay(3000);
+    while (Devices::get<sensors::Inertial>().is_calibrating()) {
+      pros::delay(20);
+    }
     Thread::startTask("fps", FPS::run);
     pros::delay(20);
-    Thread::startTask("display", Robot::display);
 }
 
 /**

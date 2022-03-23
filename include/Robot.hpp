@@ -39,5 +39,7 @@ class Robot {
     static void turnBackTo(double x, double y, std::initializer_list<double> newtPID, double newtacc);
     static void turnBackToNow(double x, double y, std::initializer_list<double> newtPID, double newtacc);
     static void waitUntilStop();
-    static void display(void* params);
+
+    static void brainDisplay(void* params);
+    static void controllerDisplay(void* params);
 };

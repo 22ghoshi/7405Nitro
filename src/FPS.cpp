@@ -10,6 +10,7 @@ void FPS::run(void* params) {
 
     while (true) {
         if (pros::Task::notify_take(true, 20)) {
+            Devices::get<sensors::Inertial>().tare_rotation();
             Devices::get<sensors::LeftEncoder>().reset();
             Devices::get<sensors::RightEncoder>().reset();
             currentPos = Point();

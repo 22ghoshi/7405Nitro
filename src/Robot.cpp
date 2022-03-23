@@ -216,22 +216,37 @@ void Robot::waitUntilStop() {
     }
 }
 
-void Robot::display(void* params) {
-    Devices::get<controllers::Master>().clear();
+void Robot::brainDisplay(void* params) {
     while (true) {
-        pros::lcd::print(0, "X: %f", FPS::currentPos.x);
+        if (Devices::get<sensors::Inertial>().is_calibrating()) {
+            pros::lcd::set_text(1, "calibrating...");
+        }
+        else {
+            pros::lcd::set_text(1, "X: " + std::to_string(FPS::currentPos.x));
+            pros::lcd::set_text(2, "Y: " + std::to_string(FPS::currentPos.y));
+            pros::lcd::set_text(3, "H: " + std::to_string(FPS::currentPos.h));
+        }
+        pros::delay(20);
+    }
+}
+
+void Robot::controllerDisplay(void* params) {
+    Devices::get<controllers::Master>().clear();
+    pros::delay(50);
+    while (true) {
+        Devices::get<controllers::Master>().print(0, 16, "bat: %g %", pros::battery::get_capacity());
         pros::delay(50);
-        pros::lcd::print(1, "Y: %f", FPS::currentPos.y);
-        pros::delay(50);
-        pros::lcd::print(2, "H: %f", FPS::currentPos.h);
-        pros::delay(50);
-        Devices::get<controllers::Master>().print(0, 12, "bat: %g %", pros::battery::get_capacity());
-        pros::delay(50);
-        Devices::get<controllers::Master>().print(0, 0, ("X: " + std::to_string(FPS::currentPos.x)).c_str());
-        pros::delay(50);
-        Devices::get<controllers::Master>().print(1, 0, ("Y: " + std::to_string(FPS::currentPos.y)).c_str());
-        pros::delay(50);
-        Devices::get<controllers::Master>().print(2, 0, ("H: " + std::to_string(FPS::currentPos.h)).c_str());
-        pros::delay(50);
+        if (Devices::get<sensors::Inertial>().is_calibrating()) {
+            Devices::get<controllers::Master>().print(0, 0, "calibrating...");
+            pros::delay(50);
+        }
+        else {
+            Devices::get<controllers::Master>().print(0, 0, ("X: " + std::to_string(FPS::currentPos.x)).c_str());
+            pros::delay(50);
+            Devices::get<controllers::Master>().print(1, 0, ("Y: " + std::to_string(FPS::currentPos.y)).c_str());
+            pros::delay(50);
+            Devices::get<controllers::Master>().print(2, 0, ("H: " + std::to_string(FPS::currentPos.h)).c_str());
+            pros::delay(50);
+        }
     }
 }
