@@ -225,6 +225,8 @@ void Robot::brainDisplay(void* params) {
             pros::lcd::set_text(1, "X: " + std::to_string(FPS::currentPos.x));
             pros::lcd::set_text(2, "Y: " + std::to_string(FPS::currentPos.y));
             pros::lcd::set_text(3, "H: " + std::to_string(FPS::currentPos.h));
+            pros::lcd::set_text(4, "leftrot: " + std::to_string(Devices::get<sensors::LeftRotation>().get_position()));
+            pros::lcd::set_text(5, "rightrot: " + std::to_string(Devices::get<sensors::RightRotation>().get_position()));
         }
         pros::delay(20);
     }

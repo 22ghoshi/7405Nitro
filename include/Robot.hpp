@@ -7,6 +7,7 @@
 #include "FrontClaw.hpp"
 #include "BackClaw.hpp"
 #include "PID.hpp"
+#include "Pursuit.hpp"
 
 #include <queue>
 

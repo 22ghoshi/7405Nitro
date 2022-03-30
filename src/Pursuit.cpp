@@ -5,6 +5,15 @@ std::vector<double> Pursuit::totalDist;
 std::vector<double> Pursuit::curvature;
 std::vector<double> Pursuit::maxVel;
 std::vector<double> Pursuit::vel;
+double Pursuit::pathMaxVel;
+double Pursuit::weightData;
+
+Point Pursuit::lastLookaheadPoint;
+
+PAV Pursuit::leftPAV{PAV(0.4, 0.5, 0.4)};
+PAV Pursuit::rightPAV{PAV(0.4, 0.5, 0.4)};
+
+bool Pursuit::done;
 
 Pursuit::Pursuit() {}
 
@@ -118,13 +127,15 @@ std::vector<double> Pursuit::calcVel(std::vector<Point> path, std::vector<double
     return vels;
 }
 
-void Pursuit::generatePath(double spacing, double weightData, double weightSmooth, double tolerance, double k, double pathMaxVel, double pathMaxAccel) {
-    path = inject(path, spacing);
-    path = smooth(path, weightData, weightSmooth, tolerance);
+void Pursuit::generatePath() {
+    pathMaxVel = (DRIVE_RPM * (2.0 * M_PI * (WHEEL_DIAMETER / 2.0))) / 60.0;
+    weightData = 1.0 - WEIGHT_SMOOTH;
+    path = inject(path, SPACING);
+    path = smooth(path, weightData, WEIGHT_SMOOTH, TOLERANCE);
     totalDist = calcTotalDist(path);
     curvature = calcCurvature(path);
-    maxVel = calcMaxVel(curvature, k, pathMaxVel);
-    vel = calcVel(path, maxVel, pathMaxAccel);
+    maxVel = calcMaxVel(curvature, K, PATH_MAX_VEL);
+    vel = calcVel(path, maxVel, PATH_MAX_ACCEL);
 }
 
 Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, double radius) {
@@ -136,7 +147,8 @@ Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, doubl
     double discriminant = pow(b, 2) - (4.0 * a * c);
 
     if (discriminant < 0) {
-        throw std::invalid_argument("discriminant < 0; no intersection between line from (" + std::to_string(lineStart.x) + ", " + std::to_string(lineStart.y) + ") to (" + std::to_string(lineEnd.x) + ", " + std::to_string(lineEnd.y) + ") and circle with center (" + std::to_string(center.x) + ", " + std::to_string(center.y) + ") and radius " + std::to_string(radius));
+        return Point(0, 0, 360);
+        // throw std::invalid_argument("discriminant < 0; no intersection between line from (" + std::to_string(lineStart.x) + ", " + std::to_string(lineStart.y) + ") to (" + std::to_string(lineEnd.x) + ", " + std::to_string(lineEnd.y) + ") and circle with center (" + std::to_string(center.x) + ", " + std::to_string(center.y) + ") and radius " + std::to_string(radius));
     }
     else {
         discriminant = sqrt(discriminant);
@@ -149,7 +161,91 @@ Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, doubl
             return lineStart + (d * t1);
         }
         else {
-            throw std::invalid_argument("t1 = " + std::to_string(t1)+ ", t2 = " + std::to_string(t2) + "; no intersection between line from (" + std::to_string(lineStart.x) + ", " + std::to_string(lineStart.y) + ") to (" + std::to_string(lineEnd.x) + ", " + std::to_string(lineEnd.y) + ") and circle with center (" + std::to_string(center.x) + ", " + std::to_string(center.y) + ") and radius " + std::to_string(radius));
+            return Point(0, 0, 360);
+            // throw std::invalid_argument("t1 = " + std::to_string(t1) + ", t2 = " + std::to_string(t2) + "; no intersection between line from (" + std::to_string(lineStart.x) + ", " + std::to_string(lineStart.y) + ") to (" + std::to_string(lineEnd.x) + ", " + std::to_string(lineEnd.y) + ") and circle with center (" + std::to_string(center.x) + ", " + std::to_string(center.y) + ") and radius " + std::to_string(radius));
         }
     }
+}
+
+int Pursuit::closestPoint(std::vector<Point> path) {
+    int closestIndex = -1;
+    double smallestDistance = std::numeric_limits<double>::max();
+    for (int i = 0; i < path.size(); i++) {
+        double distance = FPS::currentPos.distanceTo(path[i]);
+        if (distance < smallestDistance) {
+            smallestDistance = distance;
+            closestIndex = i;
+        }
+    }
+    return closestIndex;
+}
+
+Point Pursuit::lookahead(std::vector<Point> path, double lookaheadDist) {
+    Point lookaheadPoint = Point(0, 0, 360);
+    if (FPS::currentPos.distanceTo(path[path.size() - 1]) <= lookaheadDist) {
+        return path[path.size() - 1];
+    }
+    for (int i = 0; i < path.size() - 1; i++) {
+        Point intersect = calcIntersect(path[i], path[i + 1], FPS::currentPos, lookaheadDist);
+        if (intersect.h != 360) {
+            lookaheadPoint = intersect;
+        }
+    }
+
+    if (lookaheadPoint.h != 360) {
+        lastLookaheadPoint = lookaheadPoint;
+        return lookaheadPoint;
+    }
+    else {
+        return lastLookaheadPoint;
+    }
+}
+
+double Pursuit::horizontalDistance(Point currentPos, Point lookaheadPoint) {
+    double dist = currentPos.distanceTo(lookaheadPoint);
+    double heading = currentPos.angleTo(lookaheadPoint) - currentPos.h;
+    double x = dist * sin(FPS::toRadians(heading));
+    return x;
+}
+
+double Pursuit::signedCurve(Point currentPos, Point lookaheadPoint) {
+    return 2 * horizontalDistance(currentPos, lookaheadPoint) / pow(LOOKAHEAD, 2);
+}
+
+void Pursuit::run(void* params) {
+    done = false;
+    generatePath();
+    for (int i = 0; i < path.size(); i++) {
+        printf("point %d: (%f, %f), totalDist = %f, curvature = %f, maxVel = %f, vel = %f\n", i, path[i].x, path[i].y, totalDist[i], curvature[i], maxVel[i], vel[i]);
+        pros::delay(20);
+    }
+
+    int i = 0;
+    while (i < path.size() - 2) {
+        i = closestPoint(path);
+        Point lookaheadPoint = lookahead(path, LOOKAHEAD);
+        double targetLeftVel = vel[i] * (2 + (signedCurve(FPS::currentPos, lookaheadPoint) * TRACK_WIDTH)) / 2.0;
+        double targetRightVel = vel[i] * (2 - (signedCurve(FPS::currentPos, lookaheadPoint) * TRACK_WIDTH)) / 2.0;
+
+        double leftSpeed = leftPAV.getPAV(targetLeftVel, FPS::leftVel);
+        double rightSpeed = rightPAV.getPAV(targetRightVel, FPS::rightVel);
+        double scaledLeftSpeed = leftSpeed / PATH_MAX_VEL * 127.0;
+        double scaledRightSpeed = rightSpeed / PATH_MAX_VEL * 127.0;
+
+        Devices::get<motorGroups::LeftDrive>() = scaledLeftSpeed;
+        Devices::get<motorGroups::RightDrive>() = scaledRightSpeed;
+
+        printf("currentPos: (%f, %f, %f), ", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h);
+        printf("closestIndex: %d, ", i);
+        printf("lookaheadPoint: (%f, %f), ", lookaheadPoint.x, lookaheadPoint.y);
+        printf("targetVels: (%f, %f), ", targetLeftVel, targetRightVel);
+        printf("currVels: (%f, %f), ", FPS::leftVel, FPS::rightVel);
+        printf("unscaledSpeeds: (%f, %f), ", leftSpeed, rightSpeed);
+        printf("scaledSpeeds: (%f, %f), ", scaledLeftSpeed, scaledRightSpeed);
+        printf("time: %d\n", pros::millis());
+
+        // printf("currentPos: (%f, %f, %f), closestIndes: %d, lookaheadPoint: (%f, %f), targetVels: (%f, %f), currVels: (%f, %f), unscaledSpeeds: (%f, %f), scaledSpeeds: (%f, %f), time: %d\n", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h, i, lookaheadPoint.x, lookaheadPoint.y, targetLeftVel, targetRightVel, currLeftVel, currRightVel, leftSpeed, rightSpeed, scaledLeftSpeed, scaledRightSpeed, pros::millis());
+        pros::delay(100);
+    }
+    done = true;
 }

@@ -1,7 +1,7 @@
 #include "includes.hpp"
 
 std::vector<std::string> autonNames{"left", "middle", "right", "skills", "test"};
-autons auton = autons::left;
+autons auton = autons::test;
 
 lv_obj_t * myButton;
 lv_obj_t * myButtonLabel;

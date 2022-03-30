@@ -20,5 +20,6 @@ class MotorGroup {
     void moveVelocity(std::int32_t velocity);
     double getEncoders();
     void resetEncoders();
+    double getAverageVelocity();
     void stop(brakeType brake = brakeType::coast);
 };

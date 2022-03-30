@@ -17,7 +17,13 @@ void skills() {
 }
 
 void test() {
-    
+    Thread::notifyTask("move");
+    Pursuit::path = {Point(0, 0), Point(0, 48), Point(48, 48), Point(48, 0), Point(96, 0), Point(96, 48)};
+    Thread::startTask("pursuit", Pursuit::run);
+    while (!Pursuit::done) {
+        pros::delay(20);
+    }
+    Thread::killTask("pursuit");
 }
 
 /**

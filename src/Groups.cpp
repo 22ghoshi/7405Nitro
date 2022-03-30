@@ -54,3 +54,11 @@ void MotorGroup::stop(brakeType brake) {
             break;
     }
 }
+
+double MotorGroup::getAverageVelocity() {
+    double totalVel = 0;
+    for (auto const& motor : this->group) {
+        totalVel += motor().get_actual_velocity();
+    }
+    return (totalVel / this->group.size());
+}

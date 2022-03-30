@@ -3,6 +3,8 @@
 
 #include "Devices.hpp"
 
+#define DEADWHEEL_DIAMETER 1.16 //will be 2.75
+
 struct Point {
     double x;
     double y;
@@ -17,6 +19,11 @@ struct Point {
         this->x = x;
         this->y = y;
         this->h = 0;
+    }
+    Point(double x, double y, double h) {
+        this->x = x;
+        this->y = y;
+        this->h = h;
     }
     Point(const Point& point) {
         this->x = point.x;
@@ -70,6 +77,9 @@ struct Point {
 class FPS {
     public:
     FPS();
+
+    static double leftVel;
+    static double rightVel;
 
     static Point currentPos;
     static void run(void* params);
