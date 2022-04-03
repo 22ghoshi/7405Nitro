@@ -5,8 +5,6 @@ std::vector<double> Pursuit::totalDist;
 std::vector<double> Pursuit::curvature;
 std::vector<double> Pursuit::maxVel;
 std::vector<double> Pursuit::vel;
-double Pursuit::pathMaxVel;
-double Pursuit::weightData;
 
 Point Pursuit::lastLookaheadPoint;
 
@@ -16,6 +14,16 @@ PAV Pursuit::rightPAV{PAV(0.4, 0.5, 0.4)};
 bool Pursuit::done;
 
 Pursuit::Pursuit() {}
+
+void Pursuit::setPath(std::initializer_list<std::initializer_list<double>> points) {
+    path.clear();
+    for (auto const& point : points) {
+        Point pathPoint;
+        pathPoint.x = point.begin()[0];
+        pathPoint.y = point.begin()[1];
+        path.push_back(pathPoint);
+    }
+}
 
 std::vector<Point> Pursuit::inject(std::vector<Point> path, double spacing) {
     std::vector<Point> newPath {};
@@ -127,15 +135,13 @@ std::vector<double> Pursuit::calcVel(std::vector<Point> path, std::vector<double
     return vels;
 }
 
-void Pursuit::generatePath() {
-    pathMaxVel = (DRIVE_RPM * (2.0 * M_PI * (WHEEL_DIAMETER / 2.0))) / 60.0;
-    weightData = 1.0 - WEIGHT_SMOOTH;
-    path = inject(path, SPACING);
-    path = smooth(path, weightData, WEIGHT_SMOOTH, TOLERANCE);
+void Pursuit::generatePath(double spacing, double weightSmooth, double tolerance, double k, double pathMaxVel, double pathMaxAccel) {
+    path = inject(path, spacing);
+    path = smooth(path, 1.0f - weightSmooth, weightSmooth, tolerance);
     totalDist = calcTotalDist(path);
     curvature = calcCurvature(path);
-    maxVel = calcMaxVel(curvature, K, PATH_MAX_VEL);
-    vel = calcVel(path, maxVel, PATH_MAX_ACCEL);
+    maxVel = calcMaxVel(curvature, k, pathMaxVel);
+    vel = calcVel(path, maxVel, pathMaxAccel);
 }
 
 Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, double radius) {
@@ -167,11 +173,11 @@ Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, doubl
     }
 }
 
-int Pursuit::closestPoint(std::vector<Point> path) {
-    int closestIndex = -1;
-    double smallestDistance = std::numeric_limits<double>::max();
-    for (int i = 0; i < path.size(); i++) {
-        double distance = FPS::currentPos.distanceTo(path[i]);
+int Pursuit::closestPoint(std::vector<Point> path, Point currentPos) {
+    int closestIndex = 0;
+    double smallestDistance = currentPos.distanceTo(path[0]);
+    for (int i = 1; i < path.size(); i++) {
+        double distance = currentPos.distanceTo(path[i]);
         if (distance < smallestDistance) {
             smallestDistance = distance;
             closestIndex = i;
@@ -180,13 +186,13 @@ int Pursuit::closestPoint(std::vector<Point> path) {
     return closestIndex;
 }
 
-Point Pursuit::lookahead(std::vector<Point> path, double lookaheadDist) {
+Point Pursuit::lookahead(std::vector<Point> path, Point currentPos, double lookaheadDist) {
     Point lookaheadPoint = Point(0, 0, 360);
-    if (FPS::currentPos.distanceTo(path[path.size() - 1]) <= lookaheadDist) {
-        return path[path.size() - 1];
+    if (currentPos.distanceTo(path.back()) <= lookaheadDist) {
+        return path.back();
     }
     for (int i = 0; i < path.size() - 1; i++) {
-        Point intersect = calcIntersect(path[i], path[i + 1], FPS::currentPos, lookaheadDist);
+        Point intersect = calcIntersect(path[i], path[i + 1], currentPos, lookaheadDist);
         if (intersect.h != 360) {
             lookaheadPoint = intersect;
         }
@@ -208,13 +214,12 @@ double Pursuit::horizontalDistance(Point currentPos, Point lookaheadPoint) {
     return x;
 }
 
-double Pursuit::signedCurve(Point currentPos, Point lookaheadPoint) {
-    return 2 * horizontalDistance(currentPos, lookaheadPoint) / pow(LOOKAHEAD, 2);
+double Pursuit::signedCurve(Point currentPos, Point lookaheadPoint, double lookaheadDist) {
+    return 2 * horizontalDistance(currentPos, lookaheadPoint) / pow(lookaheadDist, 2);
 }
 
 void Pursuit::run(void* params) {
     done = false;
-    generatePath();
     for (int i = 0; i < path.size(); i++) {
         printf("point %d: (%f, %f), totalDist = %f, curvature = %f, maxVel = %f, vel = %f\n", i, path[i].x, path[i].y, totalDist[i], curvature[i], maxVel[i], vel[i]);
         pros::delay(20);
@@ -222,10 +227,10 @@ void Pursuit::run(void* params) {
 
     int i = 0;
     while (i < path.size() - 2) {
-        i = closestPoint(path);
-        Point lookaheadPoint = lookahead(path, LOOKAHEAD);
-        double targetLeftVel = vel[i] * (2 + (signedCurve(FPS::currentPos, lookaheadPoint) * TRACK_WIDTH)) / 2.0;
-        double targetRightVel = vel[i] * (2 - (signedCurve(FPS::currentPos, lookaheadPoint) * TRACK_WIDTH)) / 2.0;
+        i = closestPoint(path, FPS::currentPos);
+        Point lookaheadPoint = lookahead(path, FPS::currentPos, LOOKAHEAD);
+        double targetLeftVel = vel[i] * (2 + (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
+        double targetRightVel = vel[i] * (2 - (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
 
         double leftSpeed = leftPAV.getPAV(targetLeftVel, FPS::leftVel);
         double rightSpeed = rightPAV.getPAV(targetRightVel, FPS::rightVel);
@@ -243,8 +248,7 @@ void Pursuit::run(void* params) {
         printf("unscaledSpeeds: (%f, %f), ", leftSpeed, rightSpeed);
         printf("scaledSpeeds: (%f, %f), ", scaledLeftSpeed, scaledRightSpeed);
         printf("time: %d\n", pros::millis());
-
-        // printf("currentPos: (%f, %f, %f), closestIndes: %d, lookaheadPoint: (%f, %f), targetVels: (%f, %f), currVels: (%f, %f), unscaledSpeeds: (%f, %f), scaledSpeeds: (%f, %f), time: %d\n", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h, i, lookaheadPoint.x, lookaheadPoint.y, targetLeftVel, targetRightVel, currLeftVel, currRightVel, leftSpeed, rightSpeed, scaledLeftSpeed, scaledRightSpeed, pros::millis());
+        
         pros::delay(100);
     }
     done = true;
