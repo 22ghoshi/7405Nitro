@@ -3,6 +3,8 @@
 
 #include "FPS.hpp"
 #include "PAV.hpp"
+#include "Robot.hpp"
+#include "Thread.hpp"
 
 #include <limits>
 
@@ -29,11 +31,15 @@ class Pursuit {
     static std::vector<double> maxVel;
     static std::vector<double> vel;
 
+    static int direction;
+
+    static double lastLookaheadIndex;
     static Point lastLookaheadPoint;
-    static Point lastPathPoint;
 
     static PAV leftPAV;
     static PAV rightPAV;
+
+    static PID endPID;
 
     static bool done;
 
@@ -45,9 +51,9 @@ class Pursuit {
     static std::vector<double> calcCurvature(std::vector<Point> path);
     static std::vector<double> calcMaxVel(std::vector<double> curvatures, double k, double pathMaxVel);
     static std::vector<double> calcVel(std::vector<Point> path, std::vector<double> maxVels, double pathMaxAccel);
-    static void generatePath(double spacing = SPACING, double weightSmooth = WEIGHT_SMOOTH, double tolerance = TOLERANCE, double k = K, double pathMaxVel = PATH_MAX_VEL, double pathMaxAccel = PATH_MAX_ACCEL);
+    static void generatePath(bool back = false, double spacing = SPACING, double weightSmooth = WEIGHT_SMOOTH, double tolerance = TOLERANCE, double k = K, double pathMaxVel = PATH_MAX_VEL, double pathMaxAccel = PATH_MAX_ACCEL);
 
-    static Point calcIntersect(Point lineStart, Point lineEnd, Point center, double radius);
+    static double calcIntersect(Point lineStart, Point lineEnd, Point center, double radius);
     static int closestPoint(std::vector<Point> path, Point currentPos);
     static Point lookahead(std::vector<Point> path, Point currentPos, double lookaheadDist);
     static double horizontalDistance(Point currentPos, Point lookaheadPoint);

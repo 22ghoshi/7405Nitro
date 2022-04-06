@@ -4,6 +4,7 @@
 #include "Thread.hpp"
 #include "Controller.hpp"
 #include "Robot.hpp"
+#include "Pursuit.hpp"
 
 #include "initialize.hpp"
 #include "autonomous.hpp"

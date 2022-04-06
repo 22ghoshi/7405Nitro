@@ -6,10 +6,15 @@ std::vector<double> Pursuit::curvature;
 std::vector<double> Pursuit::maxVel;
 std::vector<double> Pursuit::vel;
 
+int Pursuit::direction = 1;
+
+double Pursuit::lastLookaheadIndex = 0;
 Point Pursuit::lastLookaheadPoint;
 
 PAV Pursuit::leftPAV{PAV(0.4, 0.5, 0.4)};
 PAV Pursuit::rightPAV{PAV(0.4, 0.5, 0.4)};
+
+PID Pursuit::endPID{PID(8.0, 0.0, 0.4)};
 
 bool Pursuit::done;
 
@@ -135,7 +140,8 @@ std::vector<double> Pursuit::calcVel(std::vector<Point> path, std::vector<double
     return vels;
 }
 
-void Pursuit::generatePath(double spacing, double weightSmooth, double tolerance, double k, double pathMaxVel, double pathMaxAccel) {
+void Pursuit::generatePath(bool back, double spacing, double weightSmooth, double tolerance, double k, double pathMaxVel, double pathMaxAccel) {
+    direction = back ? -1 : 1;
     path = inject(path, spacing);
     path = smooth(path, 1.0f - weightSmooth, weightSmooth, tolerance);
     totalDist = calcTotalDist(path);
@@ -144,7 +150,7 @@ void Pursuit::generatePath(double spacing, double weightSmooth, double tolerance
     vel = calcVel(path, maxVel, pathMaxAccel);
 }
 
-Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, double radius) {
+double Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, double radius) {
     Point d  = lineEnd - lineStart;
     Point f = lineStart - center;
     double a = pow(d.magnitude(), 2);
@@ -153,7 +159,7 @@ Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, doubl
     double discriminant = pow(b, 2) - (4.0 * a * c);
 
     if (discriminant < 0) {
-        return Point(0, 0, 360);
+        return -1;
         // throw std::invalid_argument("discriminant < 0; no intersection between line from (" + std::to_string(lineStart.x) + ", " + std::to_string(lineStart.y) + ") to (" + std::to_string(lineEnd.x) + ", " + std::to_string(lineEnd.y) + ") and circle with center (" + std::to_string(center.x) + ", " + std::to_string(center.y) + ") and radius " + std::to_string(radius));
     }
     else {
@@ -161,13 +167,13 @@ Point Pursuit::calcIntersect(Point lineStart, Point lineEnd, Point center, doubl
         double t1 = (-b - discriminant) / (2.0 * a);
         double t2 = (-b + discriminant) / (2.0 * a);
         if (t2 >= 0.0 && t2 <= 1.0) {
-            return lineStart + (d * t2);
+            return t2;
         }
         else if (t1 >= 0.0 && t1 <= 1.0) {
-            return lineStart + (d * t1);
+            return t1;
         }
         else {
-            return Point(0, 0, 360);
+            return -1;
             // throw std::invalid_argument("t1 = " + std::to_string(t1) + ", t2 = " + std::to_string(t2) + "; no intersection between line from (" + std::to_string(lineStart.x) + ", " + std::to_string(lineStart.y) + ") to (" + std::to_string(lineEnd.x) + ", " + std::to_string(lineEnd.y) + ") and circle with center (" + std::to_string(center.x) + ", " + std::to_string(center.y) + ") and radius " + std::to_string(radius));
         }
     }
@@ -188,13 +194,13 @@ int Pursuit::closestPoint(std::vector<Point> path, Point currentPos) {
 
 Point Pursuit::lookahead(std::vector<Point> path, Point currentPos, double lookaheadDist) {
     Point lookaheadPoint = Point(0, 0, 360);
-    if (currentPos.distanceTo(path.back()) <= lookaheadDist) {
-        return path.back();
-    }
+
     for (int i = 0; i < path.size() - 1; i++) {
-        Point intersect = calcIntersect(path[i], path[i + 1], currentPos, lookaheadDist);
-        if (intersect.h != 360) {
-            lookaheadPoint = intersect;
+        double intersect = calcIntersect(path[i], path[i + 1], currentPos, lookaheadDist);
+        if (intersect >= 0 && (i + intersect) > lastLookaheadIndex) {
+            lastLookaheadIndex = i + intersect;
+            lookaheadPoint = path[i] + ((path[i + 1] - path[i]) * intersect);
+            break;
         }
     }
 
@@ -203,7 +209,12 @@ Point Pursuit::lookahead(std::vector<Point> path, Point currentPos, double looka
         return lookaheadPoint;
     }
     else {
-        return lastLookaheadPoint;
+        if (currentPos.distanceTo(path.back()) <= lookaheadDist) {
+            return path.back();
+        }
+        else {
+            return lastLookaheadPoint;
+        }   
     }
 }
 
@@ -219,6 +230,7 @@ double Pursuit::signedCurve(Point currentPos, Point lookaheadPoint, double looka
 }
 
 void Pursuit::run(void* params) {
+    Thread::notifyTask("move");
     done = false;
     for (int i = 0; i < path.size(); i++) {
         printf("point %d: (%f, %f), totalDist = %f, curvature = %f, maxVel = %f, vel = %f\n", i, path[i].x, path[i].y, totalDist[i], curvature[i], maxVel[i], vel[i]);
@@ -226,11 +238,11 @@ void Pursuit::run(void* params) {
     }
 
     int i = 0;
-    while (i < path.size() - 2) {
+    while (lastLookaheadIndex < path.size() * (0.75) || FPS::currentPos.distanceTo(path.back()) >= LOOKAHEAD) {
         i = closestPoint(path, FPS::currentPos);
         Point lookaheadPoint = lookahead(path, FPS::currentPos, LOOKAHEAD);
-        double targetLeftVel = vel[i] * (2 + (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
-        double targetRightVel = vel[i] * (2 - (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
+        double targetLeftVel = direction * vel[i] * (2 + (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
+        double targetRightVel = direction * vel[i] * (2 - (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
 
         double leftSpeed = leftPAV.getPAV(targetLeftVel, FPS::leftVel);
         double rightSpeed = rightPAV.getPAV(targetRightVel, FPS::rightVel);
@@ -240,8 +252,10 @@ void Pursuit::run(void* params) {
         Devices::get<motorGroups::LeftDrive>() = scaledLeftSpeed;
         Devices::get<motorGroups::RightDrive>() = scaledRightSpeed;
 
+        double endSpeed = endPID.getPID(FPS::currentPos.distanceTo(path.back()));
+
         printf("currentPos: (%f, %f, %f), ", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h);
-        printf("closestIndex: %d, ", i);
+        printf("closestIndex: %d, lookaheadIndex: %f ", i, lastLookaheadIndex);
         printf("lookaheadPoint: (%f, %f), ", lookaheadPoint.x, lookaheadPoint.y);
         printf("targetVels: (%f, %f), ", targetLeftVel, targetRightVel);
         printf("currVels: (%f, %f), ", FPS::leftVel, FPS::rightVel);
@@ -251,5 +265,7 @@ void Pursuit::run(void* params) {
         
         pros::delay(100);
     }
+    Robot::moveTo(path.back().x, path.back().y, {8.0, 0.0, 4.0}, 0.2, {2.0, 0.0, 1.0}, 1.0);
+    Thread::startTask("move", Robot::move);
     done = true;
 }

@@ -44,32 +44,32 @@ namespace Devices {
 
     template<> inline
     auto get<motors::BackLeft>() {
-        return *(Devices::getMotor("Back Left", 2, motorGearset::GS200, true));
+        return *(Devices::getMotor("Back Left", 9, motorGearset::GS600, true));
     }
 
     template<> inline
     auto get<motors::BackRight>() {
-        return *(Devices::getMotor("Back Right", 3, motorGearset::GS200));
+        return *(Devices::getMotor("Back Right", 7, motorGearset::GS600));
     }
 
     template<> inline
     auto get<motors::MidLeft>() {
-        return *(Devices::getMotor("Mid Left", 6, motorGearset::GS200, true));
+        return *(Devices::getMotor("Mid Left", 10, motorGearset::GS600, true));
     }
 
     template<> inline
     auto get<motors::MidRight>() {
-        return *(Devices::getMotor("Mid Right", 7, motorGearset::GS200));
+        return *(Devices::getMotor("Mid Right", 6, motorGearset::GS600));
     }
 
     template<> inline
     auto get<motors::FrontLeft>() {
-        return *(Devices::getMotor("Front Left", 21, motorGearset::GS200));
+        return *(Devices::getMotor("Front Left", 8, motorGearset::GS600));
     }
 
     template<> inline
     auto get<motors::FrontRight>() {
-        return *(Devices::getMotor("Front Right", 18, motorGearset::GS200, true));
+        return *(Devices::getMotor("Front Right", 20, motorGearset::GS600, true));
     }
 
     template<> inline
@@ -79,7 +79,7 @@ namespace Devices {
 
     template<> inline
     auto get<motors::Lift>() {
-        return *(Devices::getMotor("Lift", 10, motorGearset::GS100, true));
+        return *(Devices::getMotor("Lift", 5, motorGearset::GS100));
     }
 
     template <motorGroups motorGroup>
@@ -123,23 +123,23 @@ namespace Devices {
 
     template<> inline
     auto get<sensors::Inertial>() {
-        return *(Devices::getInertial("Inertial", 9));
+        return *(Devices::getInertial("Inertial", 3));
     }
 
     template<> inline
     auto get<sensors::LeftRotation>() {
-        return *(Devices::getRotation("Left", 8));
+        return *(Devices::getRotation("Left", 4));
     }
 
     template<> inline
     auto get<sensors::RightRotation>() {
-        return *(Devices::getRotation("Right", 15));
+        return *(Devices::getRotation("Right", 21));
     }
     
 
     template<> inline
     auto get<sensors::LiftPotentiometer>() {
-        return *(Devices::getPotentiometer("Lift", 3));
+        return *(Devices::getPotentiometer("Lift", 8));
     }
 
     template<> inline

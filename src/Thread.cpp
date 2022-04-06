@@ -43,9 +43,11 @@ bool Thread::existsTask(std::string name) {
 }
 
 void Thread::notifyTask(std::string name) {
-	tasks.at(name)->notify();
-  pros::delay(20);
-  if (tasks.at(name)->get_state() == pros::E_TASK_STATE_DELETED) {
-    tasks.erase(name);
+	if (existsTask(name)) {
+    tasks.at(name)->notify();
+    pros::delay(20);
+    if (tasks.at(name)->get_state() == pros::E_TASK_STATE_DELETED) {
+      tasks.erase(name);
+    }
   }
 }

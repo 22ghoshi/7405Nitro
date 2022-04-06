@@ -8,8 +8,9 @@ FPS::FPS() {}
 
 void FPS::run(void* params) {
     Devices::get<sensors::LeftRotation>().reset_position();
-    Devices::get<sensors::LeftRotation>().reverse(); //***
+    Devices::get<sensors::LeftRotation>().reverse();
     Devices::get<sensors::RightRotation>().reset_position();
+    Devices::get<sensors::RightRotation>().reverse();
     double prevLE, prevRE = 0;
 
     double prevLeftVel, prevRightVel = 0;

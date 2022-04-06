@@ -17,9 +17,8 @@ void skills() {
 }
 
 void test() {
-    Thread::notifyTask("move");
-    Pursuit::setPath({{0, 0}, {0, 48}, {48, 48}, {48, 0}, {96, 0}, {96, 48}});
-    Pursuit::generatePath();
+    Pursuit::setPath({{0, 0}, {0, -48}, {-48, -48}, {-48, 0}, {-96, 0}, {-96, -48}});
+    Pursuit::generatePath(true);
     Thread::startTask("pursuit", Pursuit::run);
     while (!Pursuit::done) {
         pros::delay(20);

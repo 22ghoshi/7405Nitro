@@ -11,7 +11,7 @@ PID Robot::mPID{PID(0, 0, 0)};
 PID Robot::tPID{PID(0, 0, 0)};
 double Robot::moveErr;
 double Robot::turnErr;
-double Robot::macc = 20;
+double Robot::macc = 0.25;
 double Robot::tacc = 3;
 bool Robot::turning = false;
 bool Robot::turningBack = false;
@@ -38,7 +38,7 @@ void Robot::move(void* params) {
         if (fabs(turnErr) > tacc) {
             double turnSpeed = tPID.getPID(turnErr);
             Drive::arcade(0, turnSpeed);
-            printf("\ncurrentPos = (%d, %d, %d), targetPos = (%d, %d, %d), move = %d, turnErr = %d, turnSpeed = %d", (int)FPS::currentPos.x, (int)FPS::currentPos.y, (int)FPS::currentPos.h, (int)targetPos.x, (int)targetPos.y, (int)targetPos.h, moven, (int)turnErr, (int)turnSpeed);
+            printf("\ncurrentPos = (%f, %f, %f), targetPos = (%f, %f, %f), move = %d, turnErr = %f, turnSpeed = %f", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h, targetPos.x, targetPos.y, targetPos.h, moven, turnErr, turnSpeed);
         }
         else if (moveErr > macc) {
             double turnSpeed = tPID.getPID(turnErr);
@@ -49,7 +49,7 @@ void Robot::move(void* params) {
             moveSpeed = moveSpeed < maxMoveSpeed ? moveSpeed : maxMoveSpeed;
             turnSpeed = fabs(turnSpeed) < fabs(maxTurnSpeed) ? turnSpeed : maxTurnSpeed;
             Drive::arcade(moveSpeed * direction, turnSpeed);
-            printf("\ncurrentPos = (%d, %d, %d), targetPos = (%d, %d, %d), move = %d, moveErr = %d, moveSpeed = %d, turnErr = %d, turnSpeed = %d", (int)FPS::currentPos.x, (int)FPS::currentPos.y, (int)FPS::currentPos.h, (int)targetPos.x, (int)targetPos.y, (int)targetPos.h, moven, (int)moveErr, (int)moveSpeed, (int)turnErr, (int)turnSpeed);
+            printf("\ncurrentPos = (%f, %f, %f), targetPos = (%f, %f, %f), move = %d, moveErr = %f, moveSpeed = %f, turnErr = %f, turnSpeed = %f", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h, targetPos.x, targetPos.y, targetPos.h, moven, moveErr, moveSpeed, turnErr, turnSpeed);
         }
         else {
             Drive::stop();
