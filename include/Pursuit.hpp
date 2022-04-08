@@ -27,6 +27,7 @@ class Pursuit {
 
     static std::vector<Point> path;
     static std::vector<double> totalDist;
+    static std::vector<double> totalDistFromEnd;
     static std::vector<double> curvature;
     static std::vector<double> maxVel;
     static std::vector<double> vel;
@@ -35,11 +36,10 @@ class Pursuit {
 
     static double lastLookaheadIndex;
     static Point lastLookaheadPoint;
+    static double lookaheadDistAlongPath;
 
     static PAV leftPAV;
     static PAV rightPAV;
-
-    static PID endPID;
 
     static bool done;
 
@@ -48,6 +48,7 @@ class Pursuit {
     static std::vector<Point> inject(std::vector<Point> path, double spacing);
     static std::vector<Point> smooth(std::vector<Point> path, double weightData, double weightSmooth, double tolerance);
     static std::vector<double> calcTotalDist(std::vector<Point> path);
+    static std::vector<double> calcTotalDistFromEnd(std::vector<Point> path);
     static std::vector<double> calcCurvature(std::vector<Point> path);
     static std::vector<double> calcMaxVel(std::vector<double> curvatures, double k, double pathMaxVel);
     static std::vector<double> calcVel(std::vector<Point> path, std::vector<double> maxVels, double pathMaxAccel);
@@ -55,7 +56,9 @@ class Pursuit {
 
     static double calcIntersect(Point lineStart, Point lineEnd, Point center, double radius);
     static int closestPoint(std::vector<Point> path, Point currentPos);
+
     static Point lookahead(std::vector<Point> path, Point currentPos, double lookaheadDist);
+    static double distFromEnd(std::vector<Point> path, std::vector<double> totalDists, double pointIndex, double lookaheadDist);
     static double horizontalDistance(Point currentPos, Point lookaheadPoint);
     static double signedCurve(Point currentPos, Point lookaheadPoint, double lookaheadDist);
 

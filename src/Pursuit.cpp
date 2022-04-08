@@ -2,6 +2,7 @@
 
 std::vector<Point> Pursuit::path;
 std::vector<double> Pursuit::totalDist;
+std::vector<double> Pursuit::totalDistFromEnd;
 std::vector<double> Pursuit::curvature;
 std::vector<double> Pursuit::maxVel;
 std::vector<double> Pursuit::vel;
@@ -13,8 +14,6 @@ Point Pursuit::lastLookaheadPoint;
 
 PAV Pursuit::leftPAV{PAV(0.4, 0.5, 0.4)};
 PAV Pursuit::rightPAV{PAV(0.4, 0.5, 0.4)};
-
-PID Pursuit::endPID{PID(8.0, 0.0, 0.4)};
 
 bool Pursuit::done;
 
@@ -97,6 +96,15 @@ std::vector<double> Pursuit::calcTotalDist(std::vector<Point> path) {
     return distances;
 }
 
+std::vector<double> Pursuit::calcTotalDistFromEnd(std::vector<Point> path) {
+    std::vector<double> distances {};
+    for (int i = path.size() - 1; i > -1; i--) {
+        double dist = i == path.size() - 1 ? 0 : distances[i + 1] + path[i].distanceTo(path[i + 1]);
+        distances.push_back(dist);
+    }
+    return distances;
+}
+
 std::vector<double> Pursuit::calcCurvature(std::vector<Point> path) {
     std::vector<double> curvatures {};
     for (int i = 0; i < path.size(); i++) {
@@ -145,6 +153,7 @@ void Pursuit::generatePath(bool back, double spacing, double weightSmooth, doubl
     path = inject(path, spacing);
     path = smooth(path, 1.0f - weightSmooth, weightSmooth, tolerance);
     totalDist = calcTotalDist(path);
+    totalDistFromEnd = calcTotalDistFromEnd(path);
     curvature = calcCurvature(path);
     maxVel = calcMaxVel(curvature, k, pathMaxVel);
     vel = calcVel(path, maxVel, pathMaxAccel);
@@ -210,12 +219,18 @@ Point Pursuit::lookahead(std::vector<Point> path, Point currentPos, double looka
     }
     else {
         if (currentPos.distanceTo(path.back()) <= lookaheadDist) {
+            lastLookaheadIndex = path.size() - 1;
             return path.back();
         }
         else {
             return lastLookaheadPoint;
         }   
     }
+}
+
+double Pursuit::distFromEnd(std::vector<Point> path, std::vector<double> totalDists, double pointIndex, double lookaheadDist) {
+    double distAlongLine = (1.0 - (pointIndex - floor(pointIndex))) * path[floor(pointIndex)].distanceTo(path[ceil(pointIndex)]);
+    return distAlongLine + totalDistFromEnd[ceil(pointIndex)] + lookaheadDist;
 }
 
 double Pursuit::horizontalDistance(Point currentPos, Point lookaheadPoint) {
@@ -237,8 +252,9 @@ void Pursuit::run(void* params) {
         pros::delay(20);
     }
 
+    double endmP, endtP = 0;
     int i = 0;
-    while (lastLookaheadIndex < path.size() * (0.75) || FPS::currentPos.distanceTo(path.back()) >= LOOKAHEAD) {
+    while (distFromEnd(path, totalDist, lastLookaheadIndex, LOOKAHEAD) > LOOKAHEAD) {
         i = closestPoint(path, FPS::currentPos);
         Point lookaheadPoint = lookahead(path, FPS::currentPos, LOOKAHEAD);
         double targetLeftVel = direction * vel[i] * (2 + (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
@@ -252,10 +268,17 @@ void Pursuit::run(void* params) {
         Devices::get<motorGroups::LeftDrive>() = scaledLeftSpeed;
         Devices::get<motorGroups::RightDrive>() = scaledRightSpeed;
 
-        double endSpeed = endPID.getPID(FPS::currentPos.distanceTo(path.back()));
+        double endmP = ((scaledLeftSpeed + scaledRightSpeed) / 2.0) / FPS::currentPos.distanceTo(path.back());
+        double turnErr = FPS::currentPos.angleTo(path.back()) - FPS::currentPos.h;
+        turnErr = turnErr < 180 ? turnErr : turnErr - 360;
+        double direction = cos(FPS::toRadians(turnErr)) > 0 ? 1.0 : -1.0;
+        if (direction < 0) {
+            turnErr = turnErr > 0 ? turnErr - 180 : turnErr + 180;
+        }
+        double endtP = ((scaledLeftSpeed - scaledRightSpeed) / 2.0) / (turnErr);
 
         printf("currentPos: (%f, %f, %f), ", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h);
-        printf("closestIndex: %d, lookaheadIndex: %f ", i, lastLookaheadIndex);
+        printf("closestIndex: %d, lookaheadIndex: %f, distFromEnd: %f, ", i, lastLookaheadIndex, distFromEnd(path, totalDist, lastLookaheadIndex, LOOKAHEAD));
         printf("lookaheadPoint: (%f, %f), ", lookaheadPoint.x, lookaheadPoint.y);
         printf("targetVels: (%f, %f), ", targetLeftVel, targetRightVel);
         printf("currVels: (%f, %f), ", FPS::leftVel, FPS::rightVel);
@@ -265,7 +288,7 @@ void Pursuit::run(void* params) {
         
         pros::delay(100);
     }
-    Robot::moveTo(path.back().x, path.back().y, {8.0, 0.0, 4.0}, 0.2, {2.0, 0.0, 1.0}, 1.0);
+    Robot::moveTo(path.back().x, path.back().y, {endmP, 0.0, 4.0}, 0.2, {endtP, 0.0, 1.0}, 1.0);
     Thread::startTask("move", Robot::move);
     done = true;
 }
