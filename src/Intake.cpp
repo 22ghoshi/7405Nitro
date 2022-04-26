@@ -17,7 +17,7 @@ void Intake::intake() {
         outtaking = false;
     }
     intaking = true;
-    Devices::get<motors::Intake>() = intakeSpeed;
+    Device::get<motor::Intake>() = intakeSpeed;
 }
 
 void Intake::intakeHold() {
@@ -30,7 +30,7 @@ void Intake::outtake() {
         intaking = false;
     }
     outtaking = true;
-    Devices::get<motors::Intake>() = outtakeSpeed;
+    Device::get<motor::Intake>() = outtakeSpeed;
 }
 
 void Intake::outtakeHold() {
@@ -40,6 +40,6 @@ void Intake::outtakeHold() {
 
 void Intake::hold() {
     if (!(intaking || outtaking)) {
-        Devices::get<motors::Intake>() = 0;
+        Device::get<motor::Intake>() = 0;
     }
 }

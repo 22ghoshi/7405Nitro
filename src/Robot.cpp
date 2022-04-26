@@ -1,12 +1,12 @@
 #include "Robot.hpp"
 
-BackClaw Robot::backClaw{BackClaw(true, false, true, true)};
+BackClaw Robot::backClaw{BackClaw()};
 Drive Robot::drive{Drive()};
-FrontClaw Robot::frontClaw{FrontClaw(true, false)};
+FrontClaw Robot::frontClaw{FrontClaw()};
 Intake Robot::intake{Intake()};
-Lift Robot::lift{Lift(0.3, 0.001, 0.1, 40)};
+Lift Robot::lift{Lift()};
 
-Point Robot::targetPos{Point()};
+Point Robot::targetPos({Point()});
 PID Robot::mPID{PID(0, 0, 0)};
 PID Robot::tPID{PID(0, 0, 0)};
 double Robot::moveErr;
@@ -203,7 +203,7 @@ void Robot::waitUntilStop() {
         time += 20;
     }
     while (moveErr > macc || fabs(turnErr) > tacc) {
-        if (fabs(distances.back() - distances.front()) < 15.0 && fabs(turns.back() - turns.front()) < 0.75) {
+        if (fabs(distances.back() - distances.front()) < 0.5 && fabs(turns.back() - turns.front()) < 0.75) {
             printf("\nbroke");
             break;
         }
@@ -218,36 +218,36 @@ void Robot::waitUntilStop() {
 
 void Robot::brainDisplay(void* params) {
     while (true) {
-        if (Devices::get<sensors::Inertial>().is_calibrating()) {
+        if (Device::get<sensor::Inertial>().is_calibrating()) {
             pros::lcd::set_text(1, "calibrating...");
         }
         else {
             pros::lcd::set_text(1, "X: " + std::to_string(FPS::currentPos.x));
             pros::lcd::set_text(2, "Y: " + std::to_string(FPS::currentPos.y));
             pros::lcd::set_text(3, "H: " + std::to_string(FPS::currentPos.h));
-            pros::lcd::set_text(4, "leftrot: " + std::to_string(Devices::get<sensors::LeftRotation>().get_position()));
-            pros::lcd::set_text(5, "rightrot: " + std::to_string(Devices::get<sensors::RightRotation>().get_position()));
+            pros::lcd::set_text(4, "leftrot: " + std::to_string(Device::get<sensor::LeftRotation>().get_position()));
+            pros::lcd::set_text(5, "rightrot: " + std::to_string(Device::get<sensor::RightRotation>().get_position()));
         }
         pros::delay(20);
     }
 }
 
 void Robot::controllerDisplay(void* params) {
-    Devices::get<controllers::Master>().clear();
+    Device::get<controller::Master>().clear();
     pros::delay(50);
     while (true) {
-        Devices::get<controllers::Master>().print(0, 16, "bat: %g %", pros::battery::get_capacity());
+        Device::get<controller::Master>().print(0, 16, "bat: %g %", pros::battery::get_capacity());
         pros::delay(50);
-        if (Devices::get<sensors::Inertial>().is_calibrating()) {
-            Devices::get<controllers::Master>().print(0, 0, "calibrating...");
+        if (Device::get<sensor::Inertial>().is_calibrating()) {
+            Device::get<controller::Master>().print(0, 0, "calibrating...");
             pros::delay(50);
         }
         else {
-            Devices::get<controllers::Master>().print(0, 0, ("X: " + std::to_string(FPS::currentPos.x)).c_str());
+            Device::get<controller::Master>().print(0, 0, ("X: " + std::to_string(FPS::currentPos.x)).c_str());
             pros::delay(50);
-            Devices::get<controllers::Master>().print(1, 0, ("Y: " + std::to_string(FPS::currentPos.y)).c_str());
+            Device::get<controller::Master>().print(1, 0, ("Y: " + std::to_string(FPS::currentPos.y)).c_str());
             pros::delay(50);
-            Devices::get<controllers::Master>().print(2, 0, ("H: " + std::to_string(FPS::currentPos.h)).c_str());
+            Device::get<controller::Master>().print(2, 0, ("H: " + std::to_string(FPS::currentPos.h)).c_str());
             pros::delay(50);
         }
     }

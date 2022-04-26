@@ -237,8 +237,8 @@ void initialize() {
 
     Thread::startTask("brain display", Robot::brainDisplay);
     Thread::startTask("controller display", Robot::controllerDisplay);
-    Devices::get<sensors::Inertial>().reset();
-    while (Devices::get<sensors::Inertial>().is_calibrating()) {
+    Device::get<sensor::Inertial>().reset();
+    while (Device::get<sensor::Inertial>().is_calibrating()) {
       pros::delay(20);
     }
     Thread::startTask("fps", FPS::run);

@@ -3,24 +3,24 @@
 Drive::Drive() {}
 
 void Drive::arcade(double power, double turn) {
-    Devices::get<motorGroups::LeftDrive>() = power + turn;
-    Devices::get<motorGroups::RightDrive>() = power - turn;
+    Device::get<motorGroup::LeftDrive>() = power + turn;
+    Device::get<motorGroup::RightDrive>() = power - turn;
 }
 
 void Drive::tank(double left, double right) {
-    Devices::get<motorGroups::LeftDrive>() = left;
-    Devices::get<motorGroups::RightDrive>() = right;
+    Device::get<motorGroup::LeftDrive>() = left;
+    Device::get<motorGroup::RightDrive>() = right;
 }
 
 void Drive::mecanum(double power, double strafe, double turn) {
-    Devices::get<motors::BackLeft>() = power - strafe + turn;
-	Devices::get<motors::BackRight>() = power + strafe - turn;
-	Devices::get<motors::FrontLeft>() = power + strafe + turn;
-	Devices::get<motors::FrontRight>() = power - strafe - turn;
+    Device::get<motor::BackLeft>() = power - strafe + turn;
+	Device::get<motor::BackRight>() = power + strafe - turn;
+	Device::get<motor::FrontLeft>() = power + strafe + turn;
+	Device::get<motor::FrontRight>() = power - strafe - turn;
 }
 
 void Drive::stop(brakeType brake) {
-    Devices::get<motorGroups::Drive>().stop(brake);
+    Device::get<motorGroup::Drive>().stop(brake);
 }
 
 int Drive::dampen(int input) {
@@ -42,9 +42,9 @@ int Drive::dampen(int input) {
 }
 
 void Drive::drive(int deadzone) {
-    int power = Devices::get<controllers::Master>().get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+    int power = Device::get<controller::Master>().get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
     power = fabs(power) < deadzone ? 0 : power;
-    int turn = Devices::get<controllers::Master>().get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+    int turn = Device::get<controller::Master>().get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
     turn = fabs(turn) < deadzone ? 0 : turn;
     if (fabs(power) < deadzone && fabs(turn) < deadzone) {
         stop();

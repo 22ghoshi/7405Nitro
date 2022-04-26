@@ -16,7 +16,7 @@
 #define PATH_MAX_VEL 50.0 //max vel of robot in in/s
 #define PATH_MAX_ACCEL 30.0 //max accel of robot in in/s
 
-#define TRACK_WIDTH 13.5 //distance in inches between drive wheels on robot, plus a few inches, will be about 13?
+#define TRACK_WIDTH 14.0 //distance in inches between drive wheels on robot, plus a few inches, will be about 13?
 #define LOOKAHEAD 12.0 //lookahead distance in inches for robot to follow
 
 
@@ -58,7 +58,7 @@ class Pursuit {
     static int closestPoint(std::vector<Point> path, Point currentPos);
 
     static Point lookahead(std::vector<Point> path, Point currentPos, double lookaheadDist);
-    static double distFromEnd(std::vector<Point> path, std::vector<double> totalDists, double pointIndex, double lookaheadDist);
+    static double distFromEnd(std::vector<Point> path, std::vector<double> totalDistFromEnd, double pointIndex);
     static double horizontalDistance(Point currentPos, Point lookaheadPoint);
     static double signedCurve(Point currentPos, Point lookaheadPoint, double lookaheadDist);
 

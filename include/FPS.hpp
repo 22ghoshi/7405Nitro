@@ -3,7 +3,7 @@
 
 #include "Devices.hpp"
 
-#define DEADWHEEL_DIAMETER 1.16 //will be 2.75
+#define DEADWHEEL_DIAMETER 2.75
 
 struct Point {
     double x;

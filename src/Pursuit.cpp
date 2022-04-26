@@ -27,6 +27,7 @@ void Pursuit::setPath(std::initializer_list<std::initializer_list<double>> point
         pathPoint.y = point.begin()[1];
         path.push_back(pathPoint);
     }
+    lastLookaheadPoint = path[0];
 }
 
 std::vector<Point> Pursuit::inject(std::vector<Point> path, double spacing) {
@@ -202,7 +203,7 @@ int Pursuit::closestPoint(std::vector<Point> path, Point currentPos) {
 }
 
 Point Pursuit::lookahead(std::vector<Point> path, Point currentPos, double lookaheadDist) {
-    Point lookaheadPoint = Point(0, 0, 360);
+    Point lookaheadPoint = lastLookaheadPoint;
 
     for (int i = 0; i < path.size() - 1; i++) {
         double intersect = calcIntersect(path[i], path[i + 1], currentPos, lookaheadDist);
@@ -213,24 +214,13 @@ Point Pursuit::lookahead(std::vector<Point> path, Point currentPos, double looka
         }
     }
 
-    if (lookaheadPoint.h != 360) {
-        lastLookaheadPoint = lookaheadPoint;
-        return lookaheadPoint;
-    }
-    else {
-        if (currentPos.distanceTo(path.back()) <= lookaheadDist) {
-            lastLookaheadIndex = path.size() - 1;
-            return path.back();
-        }
-        else {
-            return lastLookaheadPoint;
-        }   
-    }
+    lastLookaheadPoint = lookaheadPoint;
+    return lookaheadPoint;
 }
 
-double Pursuit::distFromEnd(std::vector<Point> path, std::vector<double> totalDists, double pointIndex, double lookaheadDist) {
+double Pursuit::distFromEnd(std::vector<Point> path, std::vector<double> totalDistFromEnd, double pointIndex) {
     double distAlongLine = (1.0 - (pointIndex - floor(pointIndex))) * path[floor(pointIndex)].distanceTo(path[ceil(pointIndex)]);
-    return distAlongLine + totalDistFromEnd[ceil(pointIndex)] + lookaheadDist;
+    return distAlongLine + totalDistFromEnd[ceil(pointIndex)];
 }
 
 double Pursuit::horizontalDistance(Point currentPos, Point lookaheadPoint) {
@@ -253,8 +243,8 @@ void Pursuit::run(void* params) {
     }
 
     double endmP, endtP = 0;
-    int i = 0;
-    while (distFromEnd(path, totalDist, lastLookaheadIndex, LOOKAHEAD) > LOOKAHEAD) {
+    int i = closestPoint(path, FPS::currentPos);
+    while (distFromEnd(path, totalDistFromEnd, i) > LOOKAHEAD) {
         i = closestPoint(path, FPS::currentPos);
         Point lookaheadPoint = lookahead(path, FPS::currentPos, LOOKAHEAD);
         double targetLeftVel = direction * vel[i] * (2 + (signedCurve(FPS::currentPos, lookaheadPoint, LOOKAHEAD) * TRACK_WIDTH)) / 2.0;
@@ -265,8 +255,8 @@ void Pursuit::run(void* params) {
         double scaledLeftSpeed = leftSpeed / PATH_MAX_VEL * 127.0;
         double scaledRightSpeed = rightSpeed / PATH_MAX_VEL * 127.0;
 
-        Devices::get<motorGroups::LeftDrive>() = scaledLeftSpeed;
-        Devices::get<motorGroups::RightDrive>() = scaledRightSpeed;
+        Device::get<motorGroup::LeftDrive>() = scaledLeftSpeed;
+        Device::get<motorGroup::RightDrive>() = scaledRightSpeed;
 
         double endmP = ((scaledLeftSpeed + scaledRightSpeed) / 2.0) / FPS::currentPos.distanceTo(path.back());
         double turnErr = FPS::currentPos.angleTo(path.back()) - FPS::currentPos.h;
@@ -278,7 +268,7 @@ void Pursuit::run(void* params) {
         double endtP = ((scaledLeftSpeed - scaledRightSpeed) / 2.0) / (turnErr);
 
         printf("currentPos: (%f, %f, %f), ", FPS::currentPos.x, FPS::currentPos.y, FPS::currentPos.h);
-        printf("closestIndex: %d, lookaheadIndex: %f, distFromEnd: %f, ", i, lastLookaheadIndex, distFromEnd(path, totalDist, lastLookaheadIndex, LOOKAHEAD));
+        printf("closestIndex: %d, lookaheadIndex: %f, distFromEnd: %f, ", i, lastLookaheadIndex, distFromEnd(path, totalDistFromEnd, i));
         printf("lookaheadPoint: (%f, %f), ", lookaheadPoint.x, lookaheadPoint.y);
         printf("targetVels: (%f, %f), ", targetLeftVel, targetRightVel);
         printf("currVels: (%f, %f), ", FPS::leftVel, FPS::rightVel);

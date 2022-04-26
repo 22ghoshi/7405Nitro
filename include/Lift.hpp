@@ -13,7 +13,7 @@ class Lift {
     static double holdVal;
 
     public:
-    Lift(double kP, double kI, double kD, int delayset);
+    Lift();
     static void moveUp();
     static void moveDown();
     static void upHold();

@@ -7,28 +7,28 @@ double FPS::rightVel = 0;
 FPS::FPS() {}
 
 void FPS::run(void* params) {
-    Devices::get<sensors::LeftRotation>().reset_position();
-    // Devices::get<sensors::LeftRotation>().reverse();
-    Devices::get<sensors::RightRotation>().reset_position();
-    // Devices::get<sensors::RightRotation>().reverse();
+    Device::get<sensor::LeftRotation>().reset_position();
+    // Device::get<sensor::LeftRotation>().reverse();
+    Device::get<sensor::RightRotation>().reset_position();
+    // Device::get<sensor::RightRotation>().reverse();
     double prevLE, prevRE = 0;
 
     double prevLeftVel, prevRightVel = 0;
 
     while (true) {
         if (pros::Task::notify_take(true, 20)) {
-            Devices::get<sensors::Inertial>().tare_rotation();
-            Devices::get<sensors::LeftRotation>().reset_position();
-            Devices::get<sensors::RightRotation>().reset_position();
+            Device::get<sensor::Inertial>().tare_rotation();
+            Device::get<sensor::LeftRotation>().reset_position();
+            Device::get<sensor::RightRotation>().reset_position();
             currentPos = Point();
             pros::delay(20);
         }
 
-        currentPos.h = Devices::get<sensors::Inertial>().get_heading();
+        currentPos.h = Device::get<sensor::Inertial>().get_heading();
         currentPos.h = currentPos.h < 180 ? currentPos.h : currentPos.h - 360;
 
-        double currLE = Devices::get<sensors::LeftRotation>().get_position();
-        double currRE = Devices::get<sensors::RightRotation>().get_position();
+        double currLE = Device::get<sensor::LeftRotation>().get_position();
+        double currRE = Device::get<sensor::RightRotation>().get_position();
         double deltaLE = currLE - prevLE;
         double deltaRE = currRE - prevRE;
         double verticalMovement = (((deltaLE + deltaRE) / 2.0) / 100.0 / 360.0) * (M_PI * DEADWHEEL_DIAMETER);

@@ -9,7 +9,7 @@ class FrontClaw {
     static bool upVal;
     static bool state;
 
-    FrontClaw(bool initState, bool up);
+    FrontClaw();
     static void up();
     static void down();
     static void toggle();
