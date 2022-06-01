@@ -5,14 +5,16 @@
 
 class Intake {
     private:
-    static bool intaking, outtaking;
     static double intakeSpeed, outtakeSpeed;
 
     public:
+    static bool intaking, outtaking;
+
     Intake(double intake = 127, double outtake = -127);
     static void intake();
     static void intakeHold();
     static void outtake();
     static void outtakeHold();
+    static void toggle();
     static void hold();
 };

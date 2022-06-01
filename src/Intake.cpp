@@ -10,6 +10,7 @@ Intake::Intake(double intake, double outtake) {
     outtaking = false;
     intakeSpeed = intake;
     outtakeSpeed = outtake;
+    Device::get<motor::Intake>()->set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 }
 
 void Intake::intake() {
@@ -17,7 +18,7 @@ void Intake::intake() {
         outtaking = false;
     }
     intaking = true;
-    Device::get<motor::Intake>() = intakeSpeed;
+    Device::get<motor::Intake>()->move(intakeSpeed);
 }
 
 void Intake::intakeHold() {
@@ -30,7 +31,7 @@ void Intake::outtake() {
         intaking = false;
     }
     outtaking = true;
-    Device::get<motor::Intake>() = outtakeSpeed;
+    Device::get<motor::Intake>()->move(outtakeSpeed);
 }
 
 void Intake::outtakeHold() {
@@ -38,8 +39,19 @@ void Intake::outtakeHold() {
     hold();
 }
 
+void Intake::toggle() {
+    if (intaking) {
+        intaking = false;
+        hold();
+    }
+    else if (!(intaking || outtaking)) {
+        intaking = true;
+        Device::get<motor::Intake>()->move(intakeSpeed);
+    }
+}
+
 void Intake::hold() {
     if (!(intaking || outtaking)) {
-        Device::get<motor::Intake>() = 0;
+        Device::get<motor::Intake>()->brake();
     }
 }

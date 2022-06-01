@@ -6,6 +6,8 @@
 
 class Drive {
     public:
+    static bool driveHold;
+
     Drive();
 
     static void arcade(double power, double turn);
@@ -13,5 +15,6 @@ class Drive {
     static void mecanum(double power, double strafe, double turn);
     static void stop(brakeType brake = brakeType::hold);
     static int dampen(int input);
-    static void drive(int deadzone = 3);
+    static void drive(int deadzone = 0);
+    static void toggleHold();
 };

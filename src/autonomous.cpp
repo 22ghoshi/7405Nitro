@@ -9,7 +9,11 @@ void middle() {
 }
 
 void right() {
-
+    Robot::setSpeed(127);
+    FrontClaw::waitForGoal(170, 1500);
+    Robot::moveToNow(0, 900);
+    Lift::autonTarget(40);
+    Robot::turnTo(90);
 }
 
 void skills() {
@@ -17,13 +21,13 @@ void skills() {
 }
 
 void test() {
-    Pursuit::setPath({{0, 0}, {0, -48}, {-48, -48}, {-48, 0}, {-96, 0}, {-96, -48}});
-    Pursuit::generatePath(true);
-    Thread::startTask("pursuit", Pursuit::run);
-    while (!Pursuit::done) {
-        pros::delay(20);
-    }
-    Thread::killTask("pursuit");
+    // Pursuit::setPath({{0, 0}, {0, -48}, {-48, -48}, {-48, 0}, {-96, 0}, {-96, -48}});
+    // Pursuit::generatePath(true);
+    // Thread::startTask("pursuit", Pursuit::run);
+    // while (!Pursuit::done) {
+    //     pros::delay(20);
+    // }
+    // Thread::killTask("pursuit");
 }
 
 /**
@@ -40,6 +44,7 @@ void test() {
 void autonomous() {
     Thread::notifyTask("fps");
     Thread::startTask("move", Robot::move);
+    Thread::startTask("lift", Lift::move);
 
     switch(auton) {
         case autons::left:
@@ -59,6 +64,7 @@ void autonomous() {
             break;
     }
     Robot::waitUntilStop();
-    Thread::notifyTask("move");
+    Thread::killTask("move");
+    Thread::killTask("lift");
     Drive::stop();
 }

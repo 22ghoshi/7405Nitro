@@ -255,8 +255,8 @@ void Pursuit::run(void* params) {
         double scaledLeftSpeed = leftSpeed / PATH_MAX_VEL * 127.0;
         double scaledRightSpeed = rightSpeed / PATH_MAX_VEL * 127.0;
 
-        Device::get<motorGroup::LeftDrive>() = scaledLeftSpeed;
-        Device::get<motorGroup::RightDrive>() = scaledRightSpeed;
+        Device::get<motorGroup::LeftDrive>()->move(scaledLeftSpeed);
+        Device::get<motorGroup::RightDrive>()->move(scaledRightSpeed);
 
         double endmP = ((scaledLeftSpeed + scaledRightSpeed) / 2.0) / FPS::currentPos.distanceTo(path.back());
         double turnErr = FPS::currentPos.angleTo(path.back()) - FPS::currentPos.h;

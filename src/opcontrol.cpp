@@ -18,14 +18,15 @@ void opcontrol() {
 	Controller::registerButtonNewPress(pros::E_CONTROLLER_DIGITAL_X, BackClaw::toggleTilter);
 	Controller::registerButtonNewPress(pros::E_CONTROLLER_DIGITAL_B, FrontClaw::up);
 	Controller::registerButtonNewPress(pros::E_CONTROLLER_DIGITAL_A, FrontClaw::down);
-	// Controller::registerButton(pros::E_CONTROLLER_DIGITAL_R2, Intake::intake, Intake::intakeHold);
-	// Controller::registerButton(pros::E_CONTROLLER_DIGITAL_R1, Intake::outtake, Intake::outtakeHold);
+	Controller::registerButton(pros::E_CONTROLLER_DIGITAL_R1, Intake::intake, Intake::intakeHold);
+	Controller::registerButton(pros::E_CONTROLLER_DIGITAL_R2, Intake::outtake, Intake::outtakeHold);
 	Controller::registerButton(pros::E_CONTROLLER_DIGITAL_L1, Lift::moveUp, Lift::upHold);
 	Controller::registerButton(pros::E_CONTROLLER_DIGITAL_L2, Lift::moveDown, Lift::downHold);
+	Controller::registerButtonNewPress(pros::E_CONTROLLER_DIGITAL_LEFT, Drive::toggleHold);
 	Controller::registerButtonNewPress(pros::E_CONTROLLER_DIGITAL_DOWN, autonomous);
 	while (true) {
 		
-		Drive::drive(0);
+		Drive::drive(5);
 		Controller::update();
 		Controller::act();
         pros::delay(20);

@@ -9,6 +9,7 @@ class Lift {
     static PID liftPID;
     static bool up;
     static bool down;
+    static double lowerBound, upperBound;
     static int delay, delayn;
     static double holdVal;
 
@@ -19,4 +20,6 @@ class Lift {
     static void upHold();
     static void downHold();
     static void hold();
+    static void move(void* params);
+    static void autonTarget(double target);
 };

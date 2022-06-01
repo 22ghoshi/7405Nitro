@@ -13,73 +13,99 @@ enum class motorGearset { GS100, GS200, GS600 };
 enum class motor { BackLeft, BackRight, MidLeft, MidRight, FrontLeft, FrontRight, Intake, Lift };
 enum class motorGroup { LeftDrive, RightDrive, Drive };
 enum class piston { BackClaw, Tilter, FrontClaw };
-enum class sensor { Inertial, LeftRotation, RightRotation, FrontDistance, BackDistance, LiftPotentiometer };
+enum class sensor { Inertial, /*LeftRotation, RightRotation,*/ FrontDistance, /*BackDistance,*/ LiftPotentiometer };
 
 enum class controller { Master };
 
 namespace Device {
-    //defaults to 200rpm/unreversed
-    pros::Motor* getMotor(std::string name, int port, motorGearset gearset = motorGearset::GS200, bool reversed = false);
+    void initAll();
 
-    //defaults to start false
-    pros::ADIDigitalOut* getPiston(std::string name, int port, bool start = false);
+    void initMotor(motor motorName, std::uint8_t port, motorGearset gearset = motorGearset::GS200, bool reversed = false);
+    pros::Motor* getMotor(motor motorName);
+
+    void initMotorGroup(motorGroup motorGroupName, std::vector<motor> groupMotors);
+    MotorGroup* getMotorGroup(motorGroup motorGroupName);
+
+    void initPiston(piston pistonName, std::uint8_t port, bool initState = false);
+    void initPiston(piston pistonName, std::uint8_t smartPort, std::uint8_t ADIPort, bool initState = false);
+    pros::ADIDigitalOut* getPiston(piston pistonName);
     
-    pros::ADIButton* getButton(std::string name, int port);
-    pros::ADILineSensor* getLine(std::string name, int port);
-    pros::ADIPotentiometer* getPotentiometer(std::string name, int port);
-    pros::ADIUltrasonic* getUltrasonic(std::string name, int port);
+    void initButton(sensor buttonName, std::uint8_t port);
+    void initButton(sensor buttonName, std::uint8_t smartPort, std::uint8_t ADIPort);
+    pros::ADIButton* getButton(sensor buttonName);
 
-    //defaults to unreversed
-    pros::ADIEncoder* getEncoder(std::string name, int port, bool reversed = false);
+    void initLine(sensor lineName, std::uint8_t port);
+    void initLine(sensor lineName, std::uint8_t smartPort, std::uint8_t ADIPort);
+    pros::ADILineSensor* getLine(sensor lineName);
+
+    void initPotentiometer(sensor potName, std::uint8_t port);
+    void initPotentiometer(sensor potName, std::uint8_t smartPort, std::uint8_t ADIPort);
+    pros::ADIPotentiometer* getPotentiometer(sensor potName);
+
+    void initUltrasonic(sensor ultName, std::uint8_t port);
+    void initUltrasonic(sensor ultName, std::uint8_t smartPort, std::uint8_t ADIPort);
+    pros::ADIUltrasonic* getUltrasonic(sensor ultName);
+
+    void initEncoder(sensor encName, std::uint8_t port, bool reverse = false);
+    void initEncoder(sensor encName, std::uint8_t smartPort, std::uint8_t ADIPort, bool reverse = false);
+    pros::ADIEncoder* getEncoder(sensor encName);
     
-    pros::Rotation* getRotation(std::string name, int port);
-    pros::IMU* getInertial(std::string name, int port);
-    pros::Vision* getVision(std::string name, int port);
-    pros::Distance* getDistance(std::string name, int port);
+    void initRotation(sensor rotName, std::uint8_t port);
+    pros::Rotation* getRotation(sensor rotName);
 
-    pros::Controller* getController(std::string name);
+    void initInertial(sensor IMUName, std::uint8_t port);
+    pros::IMU* getInertial(sensor IMUName);
+
+    void initVision(sensor visionName, std::uint8_t port);
+    pros::Vision* getVision(sensor visionName);
+
+    void initDistance(sensor distanceName, std::uint8_t port);
+    pros::Distance* getDistance(sensor distanceName);
+
+    void initController(controller ctrlName);
+    pros::Controller* getController(controller ctrlName);
 
     template <motor motor>
     auto get();
 
     template<> inline
     auto get<motor::BackLeft>() {
-        return *(Device::getMotor("Back Left", 9, motorGearset::GS600, true));
+        return Device::getMotor(motor::BackLeft);
     }
 
     template<> inline
     auto get<motor::BackRight>() {
-        return *(Device::getMotor("Back Right", 7, motorGearset::GS600));
+        return Device::getMotor(motor::BackRight);
     }
 
     template<> inline
     auto get<motor::MidLeft>() {
-        return *(Device::getMotor("Mid Left", 10, motorGearset::GS600, true));
+        return Device::getMotor(motor::MidLeft);
     }
 
     template<> inline
     auto get<motor::MidRight>() {
-        return *(Device::getMotor("Mid Right", 6, motorGearset::GS600));
+        return Device::getMotor(motor::MidRight);
     }
 
     template<> inline
     auto get<motor::FrontLeft>() {
-        return *(Device::getMotor("Front Left", 8, motorGearset::GS600));
+        return Device::getMotor(motor::FrontLeft);
     }
 
     template<> inline
     auto get<motor::FrontRight>() {
-        return *(Device::getMotor("Front Right", 20, motorGearset::GS600, true));
+        return Device::getMotor(motor::FrontRight);
     }
 
     template<> inline
     auto get<motor::Intake>() {
-        return *(Device::getMotor("Intake", 11, motorGearset::GS200, true));
+        return Device::getMotor(motor::Intake);
     }
 
     template<> inline
     auto get<motor::Lift>() {
-        return *(Device::getMotor("Lift", 5, motorGearset::GS100));
+        return Device::getMotor(motor::Lift);
     }
 
     template <motorGroup motorGroup>
@@ -87,18 +113,17 @@ namespace Device {
 
     template<> inline
     auto get<motorGroup::LeftDrive>() {
-        return MotorGroup({get<motor::BackLeft>, get<motor::MidLeft>, get<motor::FrontLeft>});
+        return Device::getMotorGroup(motorGroup::LeftDrive);
     }
 
     template<> inline
     auto get<motorGroup::RightDrive>() {
-        return MotorGroup({get<motor::BackRight>, get<motor::MidRight>, get<motor::FrontRight>});
+        return Device::getMotorGroup(motorGroup::RightDrive);
     }
 
     template<> inline
     auto get<motorGroup::Drive>() {
-        return MotorGroup({get<motor::BackLeft>, get<motor::BackRight>, get<motor::MidLeft>, 
-                           get<motor::MidRight>, get<motor::FrontLeft>, get<motor::FrontRight>});
+        return Device::getMotorGroup(motorGroup::Drive);
     }
 
     template <piston piston>
@@ -106,17 +131,17 @@ namespace Device {
 
     template<> inline
     auto get<piston::BackClaw>() {
-        return *(Device::getPiston("Back Clamp", 4, true));
+        return Device::getPiston(piston::BackClaw);
     }
 
     template<> inline
     auto get<piston::Tilter>() {
-        return *(Device::getPiston("Tilter", 2, true));
+        return Device::getPiston(piston::Tilter);
     }
 
     template<> inline
     auto get<piston::FrontClaw>() {
-        return *(Device::getPiston("Front Clamp", 1, true));
+        return Device::getPiston(piston::FrontClaw);
     }
 
     template <sensor sensor>
@@ -124,40 +149,40 @@ namespace Device {
 
     template<> inline
     auto get<sensor::Inertial>() {
-        return *(Device::getInertial("Inertial", 3));
+        return Device::getInertial(sensor::Inertial);
     }
 
-    template<> inline
-    auto get<sensor::LeftRotation>() {
-        return *(Device::getRotation("Left", 4));
-    }
+    // template<> inline
+    // auto get<sensor::LeftRotation>() {
+    //     return Device::getRotation(sensor::LeftRotation);
+    // }
 
-    template<> inline
-    auto get<sensor::RightRotation>() {
-        return *(Device::getRotation("Right", 21));
-    }
+    // template<> inline
+    // auto get<sensor::RightRotation>() {
+    //     return Device::getRotation(sensor::RightRotation);
+    // }
     
 
     template<> inline
     auto get<sensor::LiftPotentiometer>() {
-        return *(Device::getPotentiometer("Lift", 8));
-    }
-
-    template<> inline
-    auto get<sensor::BackDistance>() {
-        return *(Device::getDistance("Back", 17));
+        return Device::getPotentiometer(sensor::LiftPotentiometer);
     }
 
     template<> inline
     auto get<sensor::FrontDistance>() {
-        return *(Device::getDistance("Front", 13));
+        return Device::getDistance(sensor::FrontDistance);
     }
+
+    // template<> inline
+    // auto get<sensor::BackDistance>() {
+    //     return Device::getDistance(sensor::BackDistance);
+    // }
 
     template<controller controller>
     auto get();
 
     template<> inline
     auto get<controller::Master>() {
-        return *(Device::getController("Master"));
+        return Device::getController(controller::Master);
     }
 };

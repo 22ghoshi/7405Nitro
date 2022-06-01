@@ -1,113 +1,232 @@
 #include "Devices.hpp"
 
-std::map<std::string, std::unique_ptr<pros::Motor>> motors;
-std::map<std::string, std::unique_ptr<pros::ADIDigitalOut>> pistons;
+std::map<motor, pros::Motor*> motors;
+std::map<motorGroup, MotorGroup*> motorGroups;
+std::map<piston, pros::ADIDigitalOut*> pistons;
 
-std::map<std::string, std::unique_ptr<pros::ADIButton>> buttons;
-std::map<std::string, std::unique_ptr<pros::ADILightSensor>> lines;
-std::map<std::string, std::unique_ptr<pros::ADIPotentiometer>> potentiometers;
-std::map<std::string, std::unique_ptr<pros::ADIUltrasonic>> ultrasonics;
-std::map<std::string, std::unique_ptr<pros::ADIEncoder>> encoders;
+std::map<sensor, pros::ADIButton*> buttons;
+std::map<sensor, pros::ADILightSensor*> lines;
+std::map<sensor, pros::ADIPotentiometer*> potentiometers;
+std::map<sensor, pros::ADIUltrasonic*> ultrasonics;
+std::map<sensor, pros::ADIEncoder*> encoders;
 
-std::map<std::string, std::unique_ptr<pros::Rotation>> rotations;
-std::map<std::string, std::unique_ptr<pros::IMU>> inertials;
-std::map<std::string, std::unique_ptr<pros::Vision>> visions;
-std::map<std::string, std::unique_ptr<pros::Distance>> distances;
+std::map<sensor, pros::Rotation*> rotations;
+std::map<sensor, pros::IMU*> inertials;
+std::map<sensor, pros::Vision*> visions;
+std::map<sensor, pros::Distance*> distances;
 
-std::map<std::string, std::unique_ptr<pros::Controller>> controllers;
+std::map<controller, pros::Controller*> controllers;
 
-pros::Motor* Device::getMotor(std::string name, int port, motorGearset gearset, bool reversed) {
-	if (motors.find(name) == motors.end()) {
+void Device::initAll() {
+	initMotor(motor::BackLeft, 16, motorGearset::GS600, true);
+	initMotor(motor::BackRight, 5, motorGearset::GS600);
+	initMotor(motor::MidLeft, 7, motorGearset::GS600, true);
+	initMotor(motor::MidRight, 3, motorGearset::GS600);
+	initMotor(motor::FrontLeft, 21, motorGearset::GS600);
+	initMotor(motor::FrontRight, 13, motorGearset::GS600, true);
+	initMotor(motor::Intake, 8, motorGearset::GS600);
+	initMotor(motor::Lift, 4, motorGearset::GS100);
+
+	initMotorGroup(motorGroup::LeftDrive, {motor::BackLeft, motor::MidLeft, motor::FrontLeft});
+	initMotorGroup(motorGroup::RightDrive, {motor::BackRight, motor::MidRight, motor::FrontRight});
+	initMotorGroup(motorGroup::Drive, {motor::BackLeft, motor::MidLeft, motor::FrontLeft,
+									   motor::BackRight, motor::MidRight, motor::FrontRight});
+
+	initPiston(piston::BackClaw, 6, 2, true);
+	initPiston(piston::Tilter, 6, 3, false);
+	initPiston(piston::FrontClaw, 6, 1, true);
+
+	initPotentiometer(sensor::LiftPotentiometer, 6, 5);
+
+	// initRotation(sensor::LeftRotation, 13);
+	// initRotation(sensor::RightRotation, 6);
+
+	initInertial(sensor::Inertial, 12);
+
+	initDistance(sensor::FrontDistance, 10);
+	// initDistance(sensor::BackDistance, 17);
+
+	initController(controller::Master);
+}
+
+void Device::initMotor(motor motorName, std::uint8_t port, motorGearset gearset, bool reversed) {
+	if (motors.find(motorName) == motors.end()) {
 		switch (gearset) {
 			case motorGearset::GS100:
-				motors[name] = std::make_unique<pros::Motor>(port, pros::E_MOTOR_GEARSET_36, reversed);
+				motors[motorName] = new pros::Motor(port, pros::E_MOTOR_GEARSET_36, reversed);
 				break;
 			case motorGearset::GS200:
-				motors[name] = std::make_unique<pros::Motor>(port, pros::E_MOTOR_GEARSET_18, reversed);
+				motors[motorName] = new pros::Motor(port, pros::E_MOTOR_GEARSET_18, reversed);
 				break;
 			case motorGearset::GS600:
-				motors[name] = std::make_unique<pros::Motor>(port, pros::E_MOTOR_GEARSET_06, reversed);
+				motors[motorName] = new pros::Motor(port, pros::E_MOTOR_GEARSET_06, reversed);
 				break;
 		}
 	}
-	return motors[name].get();
 }
 
-pros::ADIDigitalOut* Device::getPiston(std::string name, int port, bool start) {
-	if (pistons.find(name) == pistons.end()) {
-		pistons[name] = std::make_unique<pros::ADIDigitalOut>(port, start);
+pros::Motor* Device::getMotor(motor motorName) {
+	return motors[motorName];
+}
+
+void Device::initMotorGroup(motorGroup motorGroupName, std::vector<motor> groupMotors) {
+	if (motorGroups.find(motorGroupName) == motorGroups.end()) {
+		std::list<pros::Motor*> motorPtrs;
+		for (auto const& motorName : groupMotors) {
+			motorPtrs.push_back(motors[motorName]);
+		}
+		motorGroups[motorGroupName] = new MotorGroup(motorPtrs);
 	}
-	return pistons[name].get();
 }
 
-pros::ADIButton* Device::getButton(std::string name, int port) {
-	if (buttons.find(name) == buttons.end()) {
-		buttons[name] = std::make_unique<pros::ADIButton>(port);
+MotorGroup* Device::getMotorGroup(motorGroup motorGroupName) {
+	return motorGroups[motorGroupName];
+}
+
+void Device::initPiston(piston pistonName, std::uint8_t port, bool initState) {
+	if (pistons.find(pistonName) == pistons.end()) {
+		pistons[pistonName] = new pros::ADIDigitalOut(port, initState);
 	}
-	return buttons[name].get();
 }
 
-pros::ADILineSensor* Device::getLine(std::string name, int port) {
-	if (lines.find(name) == lines.end()) {
-		lines[name] = std::make_unique<pros::ADILineSensor>(port);
+void Device::initPiston(piston pistonName, std::uint8_t smartPort, std::uint8_t ADIPort, bool initState ) {
+	if (pistons.find(pistonName) == pistons.end()) {
+		pistons[pistonName] = new pros::ADIDigitalOut(std::make_pair(smartPort, ADIPort), initState);
 	}
-	return lines[name].get();
 }
 
-pros::ADIPotentiometer* Device::getPotentiometer(std::string name, int port) {
-	if (potentiometers.find(name) == potentiometers.end()) {
-		potentiometers[name] = std::make_unique<pros::ADIPotentiometer>(port);
+pros::ADIDigitalOut* Device::getPiston(piston pistonName) {
+	return pistons[pistonName];
+}
+
+void Device::initButton(sensor buttonName, std::uint8_t port) {
+	if (buttons.find(buttonName) == buttons.end()) {
+		buttons[buttonName] = new pros::ADIButton(port);
 	}
-	return potentiometers[name].get();
 }
 
-pros::ADIUltrasonic* Device::getUltrasonic(std::string name, int port) {
-	if (ultrasonics.find(name) == ultrasonics.end()) {
-		ultrasonics[name] = std::make_unique<pros::ADIUltrasonic>(port, port + 1);
+void Device::initButton(sensor buttonName, std::uint8_t smartPort, std::uint8_t ADIPort) {
+	if (buttons.find(buttonName) == buttons.end()) {
+		buttons[buttonName] = new pros::ADIButton(std::make_pair(smartPort, ADIPort));
 	}
-	return ultrasonics[name].get();
 }
 
-pros::ADIEncoder* Device::getEncoder(std::string name, int port, bool reversed) {
-	if (encoders.find(name) == encoders.end()) {
-		encoders[name] = std::make_unique<pros::ADIEncoder>(port, port + 1, reversed);
+pros::ADIButton* Device::getButton(sensor buttonName) {
+	return buttons[buttonName];
+}
+
+void Device::initLine(sensor lineName, std::uint8_t port) {
+	if (lines.find(lineName) == lines.end()) {
+		lines[lineName] = new pros::ADILineSensor(port);
 	}
-	return encoders[name].get();
 }
 
-pros::Rotation* Device::getRotation(std::string name, int port) {
-	if (rotations.find(name) == rotations.end()) {
-		rotations[name] = std::make_unique<pros::Rotation>(port);
+void Device::initLine(sensor lineName, std::uint8_t smartPort, std::uint8_t ADIPort) {
+	if (lines.find(lineName) == lines.end()) {
+		lines[lineName] = new pros::ADILineSensor(std::make_pair(smartPort, ADIPort));
 	}
-	return rotations[name].get();
 }
 
-pros::IMU* Device::getInertial(std::string name, int port) {
-	if (inertials.find(name) == inertials.end()) {
-		inertials[name] = std::make_unique<pros::IMU>(port);
+pros::ADILineSensor* Device::getLine(sensor lineName) {
+	return lines[lineName];
+}
+
+void Device::initPotentiometer(sensor potName, std::uint8_t port) {
+	if (potentiometers.find(potName) == potentiometers.end()) {
+		potentiometers[potName] = new pros::ADIPotentiometer(port);
 	}
-	return inertials[name].get();
 }
 
-pros::Vision* Device::getVision(std::string name, int port) {
-	if (visions.find(name) == visions.end()) {
-		visions[name] = std::make_unique<pros::Vision>(port);
+void Device::initPotentiometer(sensor potName, std::uint8_t smartPort, std::uint8_t ADIPort) {
+	if (potentiometers.find(potName) == potentiometers.end()) {
+		potentiometers[potName] = new pros::ADIPotentiometer(std::make_pair(smartPort, ADIPort));
 	}
-	return visions[name].get();
 }
 
-pros::Distance* Device::getDistance(std::string name, int port) {
-	if (distances.find(name) == distances.end()) {
-		distances[name] = std::make_unique<pros::Distance>(port);
+pros::ADIPotentiometer* Device::getPotentiometer(sensor potName) {
+	return potentiometers[potName];
+}
+
+void Device::initUltrasonic(sensor ultName, std::uint8_t port) {
+	if (ultrasonics.find(ultName) == ultrasonics.end()) {
+		ultrasonics[ultName] = new pros::ADIUltrasonic(port, port + 1);
 	}
-	return distances[name].get();
 }
 
-pros::Controller* Device::getController(std::string name) {
-	if (controllers.find(name) == controllers.end()) {
-		if (name == "Master") {
-			controllers[name] = std::make_unique<pros::Controller>(pros::E_CONTROLLER_MASTER);
+void Device::initUltrasonic(sensor ultName, std::uint8_t smartPort, std::uint8_t ADIPort) {
+	if (ultrasonics.find(ultName) == ultrasonics.end()) {
+		ultrasonics[ultName] = new pros::ADIUltrasonic(std::make_tuple(smartPort, ADIPort, ADIPort + 1));
+	}
+}
+
+pros::ADIUltrasonic* Device::getUltrasonic(sensor ultName) {
+	return ultrasonics[ultName];
+}
+
+void Device::initEncoder(sensor encName, std::uint8_t port, bool reverse) {
+	if (encoders.find(encName) == encoders.end()) {
+		encoders[encName] = new pros::ADIEncoder(port, port + 1, reverse);
+	}
+}
+
+void Device::initEncoder(sensor encName, std::uint8_t smartPort, std::uint8_t ADIPort, bool reverse) {
+	if (encoders.find(encName) == encoders.end()) {
+		encoders[encName] = new pros::ADIEncoder(std::make_tuple(smartPort, ADIPort, ADIPort + 1), reverse);
+	}
+}
+
+pros::ADIEncoder* Device::getEncoder(sensor encName) {
+	return encoders[encName];
+}
+
+void Device::initRotation(sensor rotName, std::uint8_t port) {
+	if (rotations.find(rotName) == rotations.end()) {
+		rotations[rotName] = new pros::Rotation(port);
+	}
+}
+
+pros::Rotation* Device::getRotation(sensor rotName) {
+	return rotations[rotName];
+}
+
+void Device::initInertial(sensor IMUName, std::uint8_t port) {
+	if (inertials.find(IMUName) == inertials.end()) {
+		inertials[IMUName] = new pros::IMU(port);
+	}
+}
+
+pros::IMU* Device::getInertial(sensor IMUName) {
+	return inertials[IMUName];
+}
+
+void Device::initVision(sensor visionName, std::uint8_t port) {
+	if (visions.find(visionName) == visions.end()) {
+		visions[visionName] = new pros::Vision(port);
+	}
+}
+
+pros::Vision* Device::getVision(sensor visionName) {
+	return visions[visionName];
+}
+
+void Device::initDistance(sensor distanceName, std::uint8_t port) {
+	if (distances.find(distanceName) == distances.end()) {
+		distances[distanceName] = new pros::Distance(port);
+	}
+}
+
+pros::Distance* Device::getDistance(sensor distanceName) {
+	return distances[distanceName];
+}
+
+void Device::initController(controller ctrlName) {
+	if (controllers.find(ctrlName) == controllers.end()) {
+		if (ctrlName == controller::Master) {
+			controllers[ctrlName] = new pros::Controller(pros::E_CONTROLLER_MASTER);
 		}
 	}
-	return controllers[name].get();
+}
+
+pros::Controller* Device::getController(controller ctrlName) {
+	return controllers[ctrlName];
 }
